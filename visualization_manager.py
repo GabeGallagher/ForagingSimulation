@@ -97,3 +97,8 @@ class VisualizationManager:
         self.draw_bots(nest)
         self.draw_targets(arena)
         self.draw_arena(arena)
+
+    def update_frame(self, frame, fig, ax: Axes, arena: Arena, nest: Nest):
+        ax.clear()
+        self.visualize_simulation(arena, nest)
+        return []
