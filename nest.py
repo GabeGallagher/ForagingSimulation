@@ -1,22 +1,25 @@
 from arena import Arena
 import random
 from microbot import MicroBot
+from enums.bot_state import BotState
+from typing import Dict
+import math
 
 
 """Contains information about the bots that the bots themselves
 should not be privy to."""
 class BotInterface:
-    def __init__(self, bot: MicroBot, position: list[float]) -> None:
+    def __init__(self, bot: MicroBot, location: list[float]) -> None:
         self.bot = bot
-        self.position = position
+        self.location = location
 
     @property
     def x(self):
-        return self.position[0]
+        return self.location[0]
     
     @property
     def y(self):
-        return self.position[1]
+        return self.location[1]
 
 """Creates micro bots, receives their signals, and controls behavior"""
 
@@ -25,7 +28,7 @@ class Nest:
     def __init__(self, arena: Arena, location: list[float]) -> None:
         self.arena = arena
         self.location = self.get_location(arena, location)
-        self.bots = {}
+        self.bots: Dict[int, BotInterface] = {}
         self.instantiate_bot()
 
     """Gets location within the simulation arena. If location is known,
@@ -48,6 +51,22 @@ class Nest:
         # bot_interface = BotInterface(bot, self.location)
         bot_interface = BotInterface(bot, [0.4, 0.4]) # debug
         self.bots[id] = bot_interface
+        self.bot_move_command(id)
 
+    # TODO: look into better ways to generate unique id
     def generate_bot_id(self):
         return len(self.bots) - 1
+    
+    def bot_move_command(self, bot_id):
+        bot: MicroBot = self.bots[bot_id].bot
+        # TODO: refactor this to handle arenas with multiple targets. Works for now because there will always just be one
+        bot_angle_to_target = self.get_new_bot_orientation(bot_id, self.arena.targets[0])
+        bot.rotate(bot_angle_to_target) # calculate bot orientation and rotate relative to target
+        bot.set_state(BotState.EXPLORING)
+
+    def get_new_bot_orientation(self, bot_id, target: list[float]):
+        bot: MicroBot = self.bots[bot_id].bot
+        bot_location = self.bots[bot_id].location
+        dx = target[0] - bot_location[0]
+        dy = target[1] - bot_location[1]
+        return math.atan2(dx, dy)

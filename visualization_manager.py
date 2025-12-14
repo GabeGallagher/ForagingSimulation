@@ -40,7 +40,7 @@ class VisualizationManager:
                 print(
                     f"Expected bot orientation: {orientation} rad = {orientation * 180/np.pi:.1f}°"
                 )
-                print(f"Expected bot Location: {ibot.position}")
+                print(f"Expected bot Location: {ibot.location}")
 
                 # Convert orientation to degrees for matplotlib
                 angle_deg = 90 - (orientation * 180 / np.pi)
