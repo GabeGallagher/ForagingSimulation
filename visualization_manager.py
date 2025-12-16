@@ -3,14 +3,25 @@ from arena import Arena
 from nest import Nest
 from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle
-from matplotlib.transforms import Affine2D
+from matplotlib.animation import FuncAnimation
+import matplotlib.pyplot as plt
 
 """Visualize simulation"""
 
 
 class VisualizationManager:
-    def __init__(self, fig, ax: Axes) -> None:
+    def __init__(self, framerate: int, fig, ax: Axes, arena: Arena, nest: Nest) -> None:
+        super().__init__()
+        self.frametime = self.get_frametime_miliseconds(framerate)
+        self.fig = fig
         self.ax = ax
+        self.elapsed: float = 0.0
+        self.last_draw: float = 0.0
+        self.arena = arena
+        self.nest = nest
+
+    def get_frametime_miliseconds(self, framerate: int) -> int:
+        return int(1000 / framerate)
 
     def draw_arena(self, arena: Arena):
         self.ax.set_xlim(0, arena.x)
@@ -37,14 +48,9 @@ class VisualizationManager:
                 length = ibot.bot.length
                 width = ibot.bot.width
                 orientation = ibot.bot.orientation
-                print(
-                    f"Expected bot orientation: {orientation} rad = {orientation * 180/np.pi:.1f}°"
-                )
-                print(f"Expected bot Location: {ibot.location}")
 
                 # Convert orientation to degrees for matplotlib
                 angle_deg = 90 - (orientation * 180 / np.pi)
-                print(f"Matplotlib angle: {angle_deg:.1f}°")
 
                 # Half dimensions
                 half_length = length / 2
@@ -98,7 +104,18 @@ class VisualizationManager:
         self.draw_targets(arena)
         self.draw_arena(arena)
 
-    def update_frame(self, frame, fig, ax: Axes, arena: Arena, nest: Nest):
-        ax.clear()
-        self.visualize_simulation(arena, nest)
+    def update_frame(self, frame):
+        self.ax.clear()
+        self.visualize_simulation(self.arena, self.nest)
         return []
+
+    def animate_simulation(self):
+        anim = FuncAnimation(
+            self.fig,
+            self.update_frame,
+            interval=self.frametime,
+            blit=False,
+            cache_frame_data=False
+        )
+        plt.show()
+        return anim
