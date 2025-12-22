@@ -97,4 +97,5 @@ class SimulationManager:
                 observer.update(self.time_delta)
             except Exception as e:
                 pass
+                # TODO: figure out why this is called every frame and fix
                 # print(f"Error updating observer {observer}: {e}")
