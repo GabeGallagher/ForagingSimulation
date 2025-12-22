@@ -90,8 +90,8 @@ class VisualizationManager:
             target_count = 1
             for target in arena.targets:
                 self.ax.plot(
-                    target[0],
-                    target[1],
+                    target.position[0],
+                    target.position[1],
                     "r*",
                     markersize=10,
                     label="Target_" + str(target_count),
