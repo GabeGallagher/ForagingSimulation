@@ -8,6 +8,7 @@ import time
 from time_step_observer import TimeStepObserver
 import threading
 from threading import Thread
+from collision_manager import CollisionManager
 
 
 class SimulationManager:
@@ -32,10 +33,13 @@ class SimulationManager:
 
         # Initialize observers list FIRST, before anything else
         self.observers: List[TimeStepObserver] = []
+        # Collision manager must be initialized before any possible colliders
+        self.collision_manager: CollisionManager = CollisionManager()
 
         self.time_delta: float = td
         self.target_locations: list[list[float]] = target_locations
         self.arena: Arena = arena
+        self.arena.instantiate_targets()
         self.headless = headless
         self.fig, self.ax = plt.subplots(figsize=(arena_size[0], arena_size[1]))
         self.current_time: float = 0.0
@@ -51,7 +55,6 @@ class SimulationManager:
             self.observers.append(observer)
 
     def unsubscribe(self, observer: TimeStepObserver):
-        """Remove an observer"""
         if observer in self.observers:
             self.observers.remove(observer)
 
@@ -84,7 +87,6 @@ class SimulationManager:
         self.sim_thread.start()
 
     def stop(self):
-        """Stop the time loop"""
         self.running = False
 
     def step(self):
@@ -94,4 +96,5 @@ class SimulationManager:
             try:
                 observer.update(self.time_delta)
             except Exception as e:
-                print(f"Error updating observer {observer}: {e}")
+                pass
+                # print(f"Error updating observer {observer}: {e}")

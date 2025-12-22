@@ -73,18 +73,18 @@ class Nest(TimeStepObserver):
         bot: MicroBot = self.bots[bot_id].bot
         # TODO: refactor this to handle arenas with multiple targets. Works for now because there will always just be one
         bot_angle_to_target = self.get_new_bot_orientation(
-            bot_id, self.arena.targets[0]
+            bot_id, self.arena.targets[0].position
         )
         bot.rotate(
             bot_angle_to_target
         )  # calculate bot orientation and rotate relative to target
         bot.set_state(BotState.EXPLORING)
 
-    def get_new_bot_orientation(self, bot_id, target: list[float]):
+    def get_new_bot_orientation(self, bot_id, target_location: list[float]):
         bot: MicroBot = self.bots[bot_id].bot
         bot_location = self.bots[bot_id].location
-        dx = target[0] - bot_location[0]
-        dy = target[1] - bot_location[1]
+        dx = target_location[0] - bot_location[0]
+        dy = target_location[1] - bot_location[1]
         return math.atan2(dx, dy)
 
     def update(self, time_delta: float):
