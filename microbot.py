@@ -1,4 +1,4 @@
-from collider import Collider
+from colliders.microbot_collider import MicroBotCollider
 from enums.bot_state import BotState
 import math
 from time_step_observer import TimeStepObserver
@@ -29,7 +29,7 @@ class MicroBot(TimeStepObserver):
 
     def set_interface(self, interface) -> None:
         self.interface = interface
-        self.collider = self.set_collider()
+        self.collider: MicroBotCollider = self.set_collider()
 
     def set_state(self, state):
         self.state = state
@@ -42,8 +42,8 @@ class MicroBot(TimeStepObserver):
         if self.interface != None:
             self.interface.set_location([dx, dy])
 
-    def set_collider(self) -> Collider:
-        return Collider(self.length / 2, self.interface.location)
+    def set_collider(self) -> MicroBotCollider:
+        return MicroBotCollider(self.length / 2, self.interface.location, self)
     
     def update(self, time_delta: float) -> None:
         match self.state:

@@ -2,7 +2,7 @@ from typing import Optional, TYPE_CHECKING
 from time_step_observer import TimeStepObserver
 
 if TYPE_CHECKING:
-    from collider import Collider
+    from colliders.collider import Collider
 
 
 class CollisionManager(TimeStepObserver):
@@ -39,6 +39,5 @@ class CollisionManager(TimeStepObserver):
         for i in range(len(self.colliders)):
             for j in range(i + 1, len(self.colliders)):
                 if self.check_overlap(self.colliders[i], self.colliders[j]):
-                    print(f"Collision detected between collider {i} and collider {j}")
                     self.colliders[i].on_collision(self.colliders[j])
                     self.colliders[j].on_collision(self.colliders[i])
