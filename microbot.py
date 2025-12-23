@@ -44,6 +44,9 @@ class MicroBot(TimeStepObserver):
 
     def set_collider(self) -> MicroBotCollider:
         return MicroBotCollider(self.length / 2, self.interface.location, self)
+
+    # def handle_collision(self, other) -> None:
+    #     self.interface.
     
     def update(self, time_delta: float) -> None:
         match self.state:

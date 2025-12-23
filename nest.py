@@ -5,28 +5,10 @@ from enums.bot_state import BotState
 from typing import Dict
 import math
 from time_step_observer import TimeStepObserver
+from typing import TYPE_CHECKING
 
-
-"""Contains information about the bots that the bots themselves
-should not be privy to."""
-
-
-class BotInterface:
-    def __init__(self, bot: MicroBot, location: list[float]) -> None:
-        self.bot = bot
-        self.location = location
-
-    def set_location(self, location: list[float]):
-        self.location[0] += location[0]
-        self.location[1] += location[1]
-
-    @property
-    def x(self):
-        return self.location[0]
-
-    @property
-    def y(self):
-        return self.location[1]
+if TYPE_CHECKING:
+    from interfaces.bot_interface import BotInterface
 
 
 """Creates micro bots, receives their signals, and controls behavior"""
@@ -57,13 +39,11 @@ class Nest(TimeStepObserver):
     def instantiate_bot(self):
         id = self.generate_bot_id()
         bot = MicroBot(id)
-        bot_interface = BotInterface(bot, self.location.copy())
+        from interfaces.bot_interface import BotInterface
+        bot_interface = BotInterface(bot, self, self.location.copy())
         self.bots[id] = bot_interface
         bot.set_interface(bot_interface)
         self.bot_move_command(id)
-
-    def get_bot_interface(self, bot_id) -> BotInterface:
-        return self.bots[bot_id]
 
     # TODO: look into better ways to generate unique id
     def generate_bot_id(self):
