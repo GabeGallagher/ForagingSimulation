@@ -4,6 +4,7 @@ from microbot import MicroBot
 from enums.bot_state import BotState
 from typing import Dict
 import math
+from target import Target
 from time_step_observer import TimeStepObserver
 from typing import TYPE_CHECKING
 
@@ -66,6 +67,13 @@ class Nest(TimeStepObserver):
         dx = target_location[0] - bot_location[0]
         dy = target_location[1] - bot_location[1]
         return math.atan2(dx, dy)
+    
+    def handle_collision(self, other, location: list[float]) -> None:
+        if isinstance(other.owner, Target):
+            print(f"Collided with Target at {other.position}")
+            # Handle collision with target (e.g., microbot collects the target)
+            # if hasattr(self.owner, 'collect_target'):
+            #     self.owner.collect_target(other.owner)
 
     def update(self, time_delta: float):
         print(f"Bot location: {self.bots[0].x}, {self.bots[0].y}")

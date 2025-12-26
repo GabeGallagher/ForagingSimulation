@@ -12,8 +12,4 @@ class MicroBotCollider(Collider):
         self.microbot: MicroBot = owner
 
     def on_collision(self, other) -> None:
-        if isinstance(other.owner, Target) and self.owner is not None:
-            print(f"Collider owned by {self.microbot.id} collided with Target at {other.position}")
-            # Handle collision with target (e.g., microbot collects the target)
-            # if hasattr(self.owner, 'collect_target'):
-            #     self.owner.collect_target(other.owner)
+        self.microbot.handle_collision(other)

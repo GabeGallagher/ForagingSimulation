@@ -23,3 +23,6 @@ class BotInterface:
     @property
     def y(self):
         return self.location[1]
+    
+    def report_collision(self, other) -> None:
+        self.nest.handle_collision(other, self.location)
