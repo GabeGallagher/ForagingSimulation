@@ -1,7 +1,7 @@
 from collision_manager import CollisionManager
 
 class Collider:
-    def __init__(self, radius, position, owner=None):
+    def __init__(self, radius, position, owner=None) -> None:
         self.radius = radius
         self.position = position
         self.owner = owner
@@ -12,7 +12,7 @@ class Collider:
         else:
             raise RuntimeError("CollisionManager instance not found.")
 
-    def on_collision(self, other):
+    def on_collision(self, other) -> None:
         from target import Target
         if isinstance(other.owner, Target) and self.owner is not None:
             print(f"Collider owned by {self.owner} collided with Target at {other.position}")

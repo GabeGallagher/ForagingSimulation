@@ -37,7 +37,7 @@ class Nest(TimeStepObserver):
             y_pos = random.uniform(0, arena.y)
             return [x_pos, y_pos]
 
-    def instantiate_bot(self):
+    def instantiate_bot(self) -> None:
         id = self.generate_bot_id()
         bot = MicroBot(id)
         from interfaces.bot_interface import BotInterface
@@ -47,10 +47,10 @@ class Nest(TimeStepObserver):
         self.bot_move_command(id)
 
     # TODO: look into better ways to generate unique id
-    def generate_bot_id(self):
+    def generate_bot_id(self) -> int:
         return len(self.bots) - 1
 
-    def bot_move_command(self, bot_id):
+    def bot_move_command(self, bot_id) -> None:
         bot: MicroBot = self.bots[bot_id].bot
         # TODO: refactor this to handle arenas with multiple targets. Works for now because there will always just be one
         bot_angle_to_target = self.get_new_bot_orientation(
@@ -61,7 +61,7 @@ class Nest(TimeStepObserver):
         )  # calculate bot orientation and rotate relative to target
         bot.set_state(BotState.EXPLORING)
 
-    def get_new_bot_orientation(self, bot_id, target_location: list[float]):
+    def get_new_bot_orientation(self, bot_id, target_location: list[float]) -> float:
         bot: MicroBot = self.bots[bot_id].bot
         bot_location = self.bots[bot_id].location
         dx = target_location[0] - bot_location[0]
@@ -74,5 +74,5 @@ class Nest(TimeStepObserver):
             bot: MicroBot = self.bots[bot_id].bot
             bot.collect_object(other.owner)
 
-    def update(self, time_delta: float):
+    def update(self, time_delta: float) -> None:
         print(f"Bot location: {self.bots[0].x}, {self.bots[0].y}")

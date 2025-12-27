@@ -12,16 +12,16 @@ class BotInterface:
         self.nest = nest
         self.location = location
 
-    def set_location(self, location: list[float]):
+    def set_location(self, location: list[float]) -> None:
         self.location[0] += location[0]
         self.location[1] += location[1]
 
     @property
-    def x(self):
+    def x(self) -> float:
         return self.location[0]
 
     @property
-    def y(self):
+    def y(self) -> float:
         return self.location[1]
     
     def report_collision(self, other) -> None:

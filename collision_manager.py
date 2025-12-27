@@ -8,13 +8,13 @@ if TYPE_CHECKING:
 class CollisionManager(TimeStepObserver):
     _instance = None
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs) -> "CollisionManager":
         if cls._instance is None:
             cls._instance = super(CollisionManager, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
     
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         if self._initialized:
             return

@@ -2,7 +2,7 @@ from colliders.collider import Collider
 
 
 class Target():
-    def __init__(self, radius, position):
+    def __init__(self, radius, position) -> None:
         self.position: list[float] = position
         self.collider: Collider = Collider(radius, position, self)
 

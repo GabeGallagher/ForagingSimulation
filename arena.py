@@ -12,15 +12,15 @@ class Arena:
         self.targets: list[Target] = []
 
     @property
-    def size(self):
+    def size(self) -> float:
         return self._x * self._y
     
     @property
-    def x(self):
+    def x(self) -> float:
         return self._x
     
     @property
-    def y(self):
+    def y(self) -> float:
         return self._y
     
     def instantiate_targets(self) -> None:

@@ -25,14 +25,14 @@ class MicroBot(TimeStepObserver):
         self.interface: BotInterface = None # Set by nest after instantiation
         self.inventory: list[any] = []
 
-    def rotate(self, angle_radians):
+    def rotate(self, angle_radians) -> None:
         self.orientation = angle_radians
 
     def set_interface(self, interface) -> None:
         self.interface = interface
         self.collider: MicroBotCollider = self.set_collider()
 
-    def set_state(self, state):
+    def set_state(self, state) -> None:
         self.state = state
         print(f"Bot: {self.id} changing to {self.state}")
 

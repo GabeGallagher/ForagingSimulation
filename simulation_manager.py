@@ -14,7 +14,7 @@ from collision_manager import CollisionManager
 class SimulationManager:
     _instance: Optional["SimulationManager"] = None
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs) -> "SimulationManager":
         if cls._instance is None:
             cls._instance = super(SimulationManager, cls).__new__(cls)
             cls._instance._initialized = False
@@ -54,7 +54,7 @@ class SimulationManager:
         if observer not in self.observers:
             self.observers.append(observer)
 
-    def unsubscribe(self, observer: TimeStepObserver):
+    def unsubscribe(self, observer: TimeStepObserver) -> None:
         if observer in self.observers:
             self.observers.remove(observer)
 
@@ -65,7 +65,7 @@ class SimulationManager:
     def get_interval_miliseconds(self, time_delta) -> int:
         return int(1000 * time_delta)
 
-    def run_realtime_loop(self):
+    def run_realtime_loop(self) -> None:
         self.running = True
 
         def loop():
@@ -86,10 +86,10 @@ class SimulationManager:
         self.sim_thread: Thread = threading.Thread(target=loop, daemon=True)
         self.sim_thread.start()
 
-    def stop(self):
+    def stop(self) -> None:
         self.running = False
 
-    def step(self):
+    def step(self) -> None:
         self.current_time += self.time_delta
 
         for observer in self.observers:

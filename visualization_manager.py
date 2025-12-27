@@ -23,7 +23,7 @@ class VisualizationManager:
     def get_frametime_miliseconds(self, framerate: int) -> int:
         return int(1000 / framerate)
 
-    def draw_arena(self, arena: Arena):
+    def draw_arena(self, arena: Arena) -> None:
         self.ax.set_xlim(0, arena.x)
         self.ax.set_ylim(0, arena.y)
         self.ax.set_xlabel("X (m)")
@@ -32,7 +32,7 @@ class VisualizationManager:
         self.ax.legend()
         self.ax.grid(True, alpha=0.3)
 
-    def draw_nest(self, nest_loc: list[float]):
+    def draw_nest(self, nest_loc: list[float]) -> None:
         if nest_loc is not None:
             self.ax.plot(
                 nest_loc[0],
@@ -42,7 +42,7 @@ class VisualizationManager:
                 label="Nest",
             )
 
-    def draw_bots(self, nest: Nest):
+    def draw_bots(self, nest: Nest) -> None:
         if len(nest.bots) > 0:
             for bot_id, ibot in nest.bots.items():
                 length = ibot.bot.length
@@ -85,7 +85,7 @@ class VisualizationManager:
                 )
                 self.ax.add_patch(rect)
 
-    def draw_targets(self, arena: Arena):
+    def draw_targets(self, arena: Arena) -> None:
         if len(arena.targets) > 0:
             target_count = 1
             for target in arena.targets:
@@ -98,18 +98,18 @@ class VisualizationManager:
                 )
                 target_count += 1
 
-    def visualize_simulation(self, arena: Arena, nest: Nest):
+    def visualize_simulation(self, arena: Arena, nest: Nest) -> None:
         self.draw_nest(nest.location)
         self.draw_bots(nest)
         self.draw_targets(arena)
         self.draw_arena(arena)
 
-    def update_frame(self, frame):
+    def update_frame(self, frame) -> list:
         self.ax.clear()
         self.visualize_simulation(self.arena, self.nest)
         return []
 
-    def animate_simulation(self):
+    def animate_simulation(self) -> FuncAnimation:
         anim = FuncAnimation(
             self.fig,
             self.update_frame,
