@@ -23,6 +23,7 @@ class MicroBot(TimeStepObserver):
         self.state = BotState.IDLE
         self.speed = 2e-1  # 20 cm/s - very fast microbot speed
         self.interface: BotInterface = None # Set by nest after instantiation
+        self.inventory: list[any] = []
 
     def rotate(self, angle_radians):
         self.orientation = angle_radians
@@ -46,7 +47,19 @@ class MicroBot(TimeStepObserver):
         return MicroBotCollider(self.length / 2, self.interface.location, self)
 
     def handle_collision(self, other) -> None:
+        self.state = BotState.IDLE
         self.interface.report_collision(other)
+
+    def attempt_collect(self, obj) -> bool:
+        # Placeholder for collection logic
+        target = obj.owner
+        pass
+
+    def collect_object(self, obj) -> None:
+        if self.attempt_collect(obj):
+            self.inventory.append(obj)
+        else:
+            self.interface.report_unable_to_collect(obj)
     
     def update(self, time_delta: float) -> None:
         match self.state:

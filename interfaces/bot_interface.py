@@ -25,4 +25,7 @@ class BotInterface:
         return self.location[1]
     
     def report_collision(self, other) -> None:
-        self.nest.handle_collision(other, self.location)
+        self.nest.handle_collision(other, self.location, self.bot.id)
+
+    def report_unable_to_collect(self, obj) -> None:
+        print(f"Bot {self.bot.id} unable to collect object at {obj.position}")

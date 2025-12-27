@@ -68,12 +68,11 @@ class Nest(TimeStepObserver):
         dy = target_location[1] - bot_location[1]
         return math.atan2(dx, dy)
     
-    def handle_collision(self, other, location: list[float]) -> None:
+    def handle_collision(self, other, location: list[float], bot_id: int) -> None:
         if isinstance(other.owner, Target):
             print(f"Collided with Target at {other.position}")
-            # Handle collision with target (e.g., microbot collects the target)
-            # if hasattr(self.owner, 'collect_target'):
-            #     self.owner.collect_target(other.owner)
+            bot: MicroBot = self.bots[bot_id].bot
+            bot.collect_object(other.owner)
 
     def update(self, time_delta: float):
         print(f"Bot location: {self.bots[0].x}, {self.bots[0].y}")
