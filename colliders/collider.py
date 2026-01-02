@@ -6,9 +6,9 @@ class Collider:
         self.position = position
         self.owner = owner
 
-        manager = CollisionManager.get_instance()
-        if manager is not None:
-            manager.register_collider(self)
+        self.manager: CollisionManager | None = CollisionManager.get_instance()
+        if self.manager is not None:
+            self.manager.register_collider(self)
         else:
             raise RuntimeError("CollisionManager instance not found.")
 
@@ -16,6 +16,10 @@ class Collider:
         from collectables.target import Target
         if isinstance(other.owner, Target) and self.owner is not None:
             print(f"Collider owned by {self.owner} collided with Target at {other.position}")
-            # Handle collision with target (e.g., microbot collects the target)
-            # if hasattr(self.owner, 'collect_target'):
-            #     self.owner.collect_target(other.owner)
+
+    def destroy(self) -> None:
+        if self.manager is not None:
+            self.manager.remove_collider(self)
+            self = None
+        else:
+            raise RuntimeError("CollisionManager instance not found in destroy function")

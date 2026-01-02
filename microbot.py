@@ -23,7 +23,6 @@ class MicroBot(TimeStepObserver):
         self.orientation = 0.0
         self.state = BotState.IDLE
         self.speed = 2e-1  # 20 cm/s - very fast microbot speed
-        # self.interface: BotInterface = None # Set by nest after instantiation
         self.inventory = []
 
     def rotate(self, angle_radians) -> None:

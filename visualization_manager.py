@@ -89,14 +89,15 @@ class VisualizationManager:
         if len(arena.targets) > 0:
             target_count = 1
             for target in arena.targets:
-                self.ax.plot(
-                    target.position[0],
-                    target.position[1],
-                    "r*",
-                    markersize=10,
-                    label="Target_" + str(target_count),
-                )
-                target_count += 1
+                if not target.iscollected:
+                    self.ax.plot(
+                        target.position[0],
+                        target.position[1],
+                        "r*",
+                        markersize=10,
+                        label="Target_" + str(target_count),
+                    )
+                    target_count += 1
 
     def visualize_simulation(self, arena: Arena, nest: Nest) -> None:
         self.draw_nest(nest.location)

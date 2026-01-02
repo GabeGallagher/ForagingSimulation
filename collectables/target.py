@@ -9,6 +9,6 @@ class Target(Collectable):
         self.collider: Collider = Collider(radius, position, self)
 
     def collect(self) -> None:
-        super().__init__()
-        print(f"Target at position {self.position} collected.")
-        
+        super().collect()
+        self.position = [-1.0, -1.0]
+        self.collider.destroy()
