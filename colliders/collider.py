@@ -13,7 +13,7 @@ class Collider:
             raise RuntimeError("CollisionManager instance not found.")
 
     def on_collision(self, other) -> None:
-        from target import Target
+        from collectables.target import Target
         if isinstance(other.owner, Target) and self.owner is not None:
             print(f"Collider owned by {self.owner} collided with Target at {other.position}")
             # Handle collision with target (e.g., microbot collects the target)

@@ -4,7 +4,7 @@ from microbot import MicroBot
 from enums.bot_state import BotState
 from typing import Dict
 import math
-from target import Target
+from collectables.target import Target
 from time_step_observer import TimeStepObserver
 from typing import TYPE_CHECKING
 
@@ -41,9 +41,10 @@ class Nest(TimeStepObserver):
         id = self.generate_bot_id()
         bot = MicroBot(id)
         from interfaces.bot_interface import BotInterface
+
         bot_interface = BotInterface(bot, self, self.location.copy())
         self.bots[id] = bot_interface
-        bot.set_interface(bot_interface)
+        bot.set_bot_interface(bot_interface)
         self.bot_move_command(id)
 
     # TODO: look into better ways to generate unique id
@@ -67,10 +68,10 @@ class Nest(TimeStepObserver):
         dx = target_location[0] - bot_location[0]
         dy = target_location[1] - bot_location[1]
         return math.atan2(dx, dy)
-    
+
     def handle_collision(self, other, location: list[float], bot_id: int) -> None:
         if isinstance(other.owner, Target):
-            print(f"Collided with Target at {other.position}")
+            print(f"Collided with {other.owner.__class__.__name__} at {other.position}")
             bot: MicroBot = self.bots[bot_id].bot
             bot.collect_object(other.owner)
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from colliders.collider import Collider
-from target import Target
+from collectables.target import Target
 
 if TYPE_CHECKING:
     from microbot import MicroBot

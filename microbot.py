@@ -1,3 +1,4 @@
+from collectables.collectable import Collectable
 from colliders.microbot_collider import MicroBotCollider
 from enums.bot_state import BotState
 import math
@@ -22,24 +23,24 @@ class MicroBot(TimeStepObserver):
         self.orientation = 0.0
         self.state = BotState.IDLE
         self.speed = 2e-1  # 20 cm/s - very fast microbot speed
-        self.interface: BotInterface = None # Set by nest after instantiation
-        self.inventory: list[any] = []
+        # self.interface: BotInterface = None # Set by nest after instantiation
+        self.inventory = []
 
     def rotate(self, angle_radians) -> None:
         self.orientation = angle_radians
 
-    def set_interface(self, interface) -> None:
-        self.interface = interface
+    def set_bot_interface(self, bot_interface) -> None:
+        self.interface: BotInterface = bot_interface
         self.collider: MicroBotCollider = self.set_collider()
 
-    def set_state(self, state) -> None:
+    def set_state(self, state: BotState) -> None:
         self.state = state
         print(f"Bot: {self.id} changing to {self.state}")
 
     def move(self, time_delta: float) -> None:
         dx = self.speed * time_delta * math.sin(self.orientation)
         dy = self.speed * time_delta * math.cos(self.orientation)
-        
+
         if self.interface != None:
             self.interface.set_location([dx, dy])
 
@@ -51,16 +52,17 @@ class MicroBot(TimeStepObserver):
         self.interface.report_collision(other)
 
     def attempt_collect(self, obj) -> bool:
-        # Placeholder for collection logic
-        target = obj.owner
-        pass
+        if isinstance(obj, Collectable):
+            obj.collect()
+            return True
+        return False
 
     def collect_object(self, obj) -> None:
         if self.attempt_collect(obj):
             self.inventory.append(obj)
         else:
             self.interface.report_unable_to_collect(obj)
-    
+
     def update(self, time_delta: float) -> None:
         match self.state:
             case BotState.EXPLORING:

@@ -1,7 +1,8 @@
+from collectables.collectable import Collectable
 from colliders.collider import Collider
 
 
-class Target():
+class Target(Collectable):
     def __init__(self, radius, position) -> None:
         self.position: list[float] = position
         self.collider: Collider = Collider(radius, position, self)

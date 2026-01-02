@@ -1,6 +1,6 @@
 """Area or Arena in which the simulation takes place"""
 
-from target import Target
+from collectables.target import Target
 
 
 class Arena:
