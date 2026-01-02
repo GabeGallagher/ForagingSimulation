@@ -1,5 +1,6 @@
-from typing import Protocol, runtime_checkable
+class Collectable:
+    def __init__(self):
+        self.iscollected = False
 
-@runtime_checkable
-class Collectable(Protocol):
-    def collect(self) -> None: ...
+    def collect(self) -> None:
+        self.iscollected = True
