@@ -86,8 +86,8 @@ class VisualizationManager:
                 self.ax.add_patch(rect)
 
     def draw_targets(self, arena: Arena) -> None:
+        self.ax.plot([], [], "r*", markersize=10, label="Target")
         if len(arena.targets) > 0:
-            target_count = 1
             for target in arena.targets:
                 if not target.iscollected:
                     self.ax.plot(
@@ -95,9 +95,7 @@ class VisualizationManager:
                         target.position[1],
                         "r*",
                         markersize=10,
-                        label="Target_" + str(target_count),
                     )
-                    target_count += 1
 
     def visualize_simulation(self, arena: Arena, nest: Nest) -> None:
         self.draw_nest(nest.location)
