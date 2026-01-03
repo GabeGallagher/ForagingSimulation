@@ -24,6 +24,7 @@ class Nest(TimeStepObserver):
         self.bots: Dict[int, BotInterface] = {}
         self.instantiate_bot()
         self.collider: Collider = Collider(0.1, self.location, self)
+        self.inventory = []
 
     """Gets location within the simulation arena. If location is known,
     return known location. Else, randomize location within arena bounds
@@ -73,9 +74,17 @@ class Nest(TimeStepObserver):
 
     def handle_collision(self, other, location: list[float], bot_id: int) -> None:
         print(f"Collided with {other.owner.__class__.__name__} at {other.position}")
+        bot: MicroBot = self.bots[bot_id].bot
         if isinstance(other.owner, Target):
-            bot: MicroBot = self.bots[bot_id].bot
             bot.collect_object(other.owner)
+        
+        elif isinstance(other.owner, Nest):
+            self.transfer_bot_inventory(bot_id)
+
+    def transfer_bot_inventory(self, bot_id) -> None:
+        bot: MicroBot = self.bots[bot_id].bot
+        self.inventory.extend(bot.inventory)
+        bot.inventory.clear()
 
     def handle_collection(self, bot_id: int, obj) -> None:
         if isinstance(obj, Target):

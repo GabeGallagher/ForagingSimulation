@@ -98,4 +98,5 @@ class SimulationManager:
             except Exception as e:
                 pass
                 # TODO: figure out why this is called every frame and fix
+                # UPDATE: I believe this is happening because there are errors that are failing silently
                 # print(f"Error updating observer {observer}: {e}")
