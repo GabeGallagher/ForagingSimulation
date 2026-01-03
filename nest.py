@@ -1,5 +1,6 @@
 from arena import Arena
 import random
+from colliders.collider import Collider
 from microbot import MicroBot
 from enums.bot_state import BotState
 from typing import Dict
@@ -22,6 +23,7 @@ class Nest(TimeStepObserver):
         self.location = self.get_location(arena, location)
         self.bots: Dict[int, BotInterface] = {}
         self.instantiate_bot()
+        self.collider: Collider = Collider(0.1, self.location, self)
 
     """Gets location within the simulation arena. If location is known,
     return known location. Else, randomize location within arena bounds
@@ -70,8 +72,8 @@ class Nest(TimeStepObserver):
         return math.atan2(dx, dy)
 
     def handle_collision(self, other, location: list[float], bot_id: int) -> None:
+        print(f"Collided with {other.owner.__class__.__name__} at {other.position}")
         if isinstance(other.owner, Target):
-            print(f"Collided with {other.owner.__class__.__name__} at {other.position}")
             bot: MicroBot = self.bots[bot_id].bot
             bot.collect_object(other.owner)
 
