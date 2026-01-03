@@ -75,5 +75,15 @@ class Nest(TimeStepObserver):
             bot: MicroBot = self.bots[bot_id].bot
             bot.collect_object(other.owner)
 
+    def handle_collection(self, bot_id: int, obj) -> None:
+        if isinstance(obj, Target):
+            self.bot_return_command(bot_id)
+
+    def bot_return_command(self, bot_id: int) -> None:
+        bot: MicroBot = self.bots[bot_id].bot
+        bot_angle_to_nest: float = self.get_new_bot_orientation(bot_id, self.location)
+        bot.rotate(bot_angle_to_nest)
+        bot.set_state(BotState.RETURNING)
+
     def update(self, time_delta: float) -> None:
         print(f"Bot location: {self.bots[0].x}, {self.bots[0].y}")

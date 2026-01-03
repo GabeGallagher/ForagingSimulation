@@ -59,10 +59,13 @@ class MicroBot(TimeStepObserver):
     def collect_object(self, obj) -> None:
         if self.attempt_collect(obj):
             self.inventory.append(obj)
+            self.interface.report_collected(obj)
         else:
             self.interface.report_unable_to_collect(obj)
 
     def update(self, time_delta: float) -> None:
         match self.state:
             case BotState.EXPLORING:
+                self.move(time_delta)
+            case BotState.RETURNING:
                 self.move(time_delta)
