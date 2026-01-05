@@ -24,6 +24,7 @@ class SimulationManager:
         self,
         td: float,
         target_locations: list[list[float]],
+        obstacle_locations: list[list[float]],
         arena: Arena,
         arena_size: list[int],
         headless=True,
@@ -38,8 +39,10 @@ class SimulationManager:
 
         self.time_delta: float = td
         self.target_locations: list[list[float]] = target_locations
+        self.obstacle_locations: list[list[float]] = obstacle_locations
         self.arena: Arena = arena
         self.arena.instantiate_targets()
+        self.arena.instantiate_obstacles()
         self.headless = headless
         self.fig, self.ax = plt.subplots(figsize=(arena_size[0], arena_size[1]))
         self.current_time: float = 0.0

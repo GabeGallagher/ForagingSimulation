@@ -8,12 +8,13 @@ if __name__ == "__main__":
     time_delta = 0.05  # 50ms
     framerate = 20
     target_locations = [[0.8, 0.8]]
-    arena = Arena([1, 1], target_locations)
+    obstacle_locations = [[0.6, 0.6]]
+    arena = Arena([1, 1], target_locations, obstacle_locations)
     arena_size = [10, 10]
     headless = False
 
     sim: SimulationManager = SimulationManager(
-        time_delta, target_locations, arena, arena_size, headless
+        time_delta, target_locations, obstacle_locations, arena, arena_size, headless
     )
     
     # Nest must init after sim manager

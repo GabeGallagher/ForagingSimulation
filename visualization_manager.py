@@ -2,7 +2,7 @@ import numpy as np
 from arena import Arena
 from nest import Nest
 from matplotlib.axes import Axes
-from matplotlib.patches import Rectangle
+from matplotlib.patches import Rectangle, Circle
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 
@@ -97,10 +97,24 @@ class VisualizationManager:
                         markersize=10,
                     )
 
+    def draw_obstacles(self, arena: Arena) -> None:
+        self.ax.plot([], [], "o", color="gray", markersize=10, label="Obstacle")
+        if len(arena.obstacles) > 0:
+            for obstacle in arena.obstacles:
+                circle = Circle(
+                    (obstacle.position[0], obstacle.position[1]),
+                    obstacle.radius,
+                    facecolor="gray",
+                    edgecolor="darkgray",
+                    alpha=0.7,
+                )
+                self.ax.add_patch(circle)
+
     def visualize_simulation(self, arena: Arena, nest: Nest) -> None:
         self.draw_nest(nest.location)
         self.draw_bots(nest)
         self.draw_targets(arena)
+        self.draw_obstacles(arena)
         self.draw_arena(arena)
 
     def update_frame(self, frame) -> list:
@@ -114,7 +128,7 @@ class VisualizationManager:
             self.update_frame,
             interval=self.frametime,
             blit=False,
-            cache_frame_data=False
+            cache_frame_data=False,
         )
         plt.show()
         return anim
