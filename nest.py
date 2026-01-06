@@ -74,8 +74,8 @@ class Nest(TimeStepObserver):
                 return
             else:
                 bot_angle_to_target = self.get_new_bot_orientation(
-                bot_id, self.arena.targets[0].position
-            )
+                    bot_id, self.arena.targets[0].position
+                )
 
         self.set_target_tracker()
         bot.rotate(
@@ -116,6 +116,10 @@ class Nest(TimeStepObserver):
 
         elif isinstance(other.owner, Nest):
             self.transfer_bot_inventory(bot_id)
+
+        elif isinstance(other.owner, MicroBot):
+            # TODO: Implement better collision handling with other bots
+            self.bot_move_to_random(bot_id)
 
     def transfer_bot_inventory(self, bot_id) -> None:
         bot: MicroBot = self.bots[bot_id].bot
