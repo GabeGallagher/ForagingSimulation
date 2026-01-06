@@ -41,8 +41,10 @@ class CollisionManager(TimeStepObserver):
         return dist_sq <= radius_sum**2
 
     def update(self, time_delta: float) -> None:
-        for i in range(len(self.colliders)):
-            for j in range(i + 1, len(self.colliders)):
-                if self.check_overlap(self.colliders[i], self.colliders[j]):
-                    self.colliders[i].on_collision(self.colliders[j])
-                    self.colliders[j].on_collision(self.colliders[i])
+        # Create snapshot to avoid issues if colliders are removed during collision handling
+        colliders_snapshot = self.colliders[:]
+        for i in range(len(colliders_snapshot)):
+            for j in range(i + 1, len(colliders_snapshot)):
+                if self.check_overlap(colliders_snapshot[i], colliders_snapshot[j]):
+                    colliders_snapshot[i].on_collision(colliders_snapshot[j])
+                    colliders_snapshot[j].on_collision(colliders_snapshot[i])

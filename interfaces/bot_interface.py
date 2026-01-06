@@ -29,21 +29,24 @@ class BotInterface:
         # Check arena boundaries and clamp position
         if new_x - bot_radius < 0:
             self.bot.set_state(BotState.IDLE)
+            self.location[0] = new_x = 0
             self.report_collision(self.arena)
         elif new_x + bot_radius > self.arena.x:
             self.bot.set_state(BotState.IDLE)
+            self.location[0] = new_x = self.arena.x
             self.report_collision(self.arena)
 
         if new_y - bot_radius < 0:
-            self.report_collision(self.arena)
             self.bot.set_state(BotState.IDLE)
+            self.location[1] = new_y = 0
+            self.report_collision(self.arena)
         elif new_y + bot_radius > self.arena.y:
             self.bot.set_state(BotState.IDLE)
+            self.location[1] = new_y = self.arena.y
             self.report_collision(self.arena)
 
-        if self.bot.state != BotState.IDLE:
-            self.location[0] = new_x
-            self.location[1] = new_y
+        self.location[0] = new_x
+        self.location[1] = new_y
 
     @property
     def x(self) -> float:

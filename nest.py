@@ -1,6 +1,7 @@
 from arena import Arena
 import random
 from colliders.collider import Collider
+from colliders.obstacle_collider import ObstacleCollider
 from microbot import MicroBot
 from enums.bot_state import BotState
 from typing import Dict
@@ -22,9 +23,11 @@ class Nest(TimeStepObserver):
         self.arena = arena
         self.location = self.get_location(arena, location)
         self.bots: Dict[int, BotInterface] = {}
+        self.target_tracker: int = 0
         self.instantiate_bot()
         self.collider: Collider = Collider(0.1, self.location, self)
         self.inventory = []
+        self.time_since_last_spawn: float = 0.0
 
     """Gets location within the simulation arena. If location is known,
     return known location. Else, randomize location within arena bounds
@@ -56,15 +59,34 @@ class Nest(TimeStepObserver):
 
     def bot_move_command(self, bot_id) -> None:
         bot: MicroBot = self.bots[bot_id].bot
-        # TODO: refactor this to handle arenas with multiple targets. Works for now because there will always just be one
-        bot_angle_to_target = self.get_new_bot_orientation(
-            # bot_id, self.arena.targets[0].position
-            bot_id, [0.0, 0.2]
-        )
+
+        if len(self.arena.targets) == 0:
+            return
+
+        try:
+            bot_angle_to_target = self.get_new_bot_orientation(
+                bot_id, self.arena.targets[self.target_tracker].position
+            )
+        except:
+            target_count: int = len(self.arena.targets)
+            if target_count == 0:
+                # TODO: implement destroy bot
+                return
+            else:
+                bot_angle_to_target = self.get_new_bot_orientation(
+                bot_id, self.arena.targets[0].position
+            )
+
+        self.set_target_tracker()
         bot.rotate(
             bot_angle_to_target
         )  # calculate bot orientation and rotate relative to target
         bot.set_state(BotState.EXPLORING)
+
+    def set_target_tracker(self) -> None:
+        self.target_tracker += 1
+        if self.target_tracker > len(self.arena.targets) - 1:
+            self.target_tracker = 0
 
     def get_new_bot_orientation(self, bot_id, target_location: list[float]) -> float:
         bot: MicroBot = self.bots[bot_id].bot
@@ -75,16 +97,23 @@ class Nest(TimeStepObserver):
 
     def handle_collision(self, other, location: list[float], bot_id: int) -> None:
         bot: MicroBot = self.bots[bot_id].bot
-        
+
         # Handle wall collision
         if isinstance(other, Arena):
             print(f"Bot {bot_id} collided with arena wall at {location}")
+            self.bot_move_to_random(bot_id)
             return
-        
+
+        if isinstance(other, ObstacleCollider):
+            print(f"Bot {bot_id} collided with obstacle at {location}")
+            self.bot_move_to_random(bot_id)
+            return
+
         # Handle other collisions
         print(f"Collided with {other.owner.__class__.__name__} at {other.position}")
         if isinstance(other.owner, Target):
             bot.collect_object(other.owner)
+
         elif isinstance(other.owner, Nest):
             self.transfer_bot_inventory(bot_id)
 
@@ -103,5 +132,16 @@ class Nest(TimeStepObserver):
         bot.rotate(bot_angle_to_nest)
         bot.set_state(BotState.RETURNING)
 
+    def bot_move_to_random(self, bot_id: int) -> None:
+        bot: MicroBot = self.bots[bot_id].bot
+        ran_x: float = random.random()
+        ran_y: float = random.random()
+        bot_random_angle: float = self.get_new_bot_orientation(bot_id, [ran_x, ran_y])
+        bot.rotate(bot_random_angle)
+        bot.set_state(BotState.EXPLORING)
+
     def update(self, time_delta: float) -> None:
-        print(f"Bot location: {self.bots[0].x}, {self.bots[0].y}")
+        self.time_since_last_spawn += time_delta
+        if self.time_since_last_spawn >= 1.0 and len(self.arena.targets) > 0:
+            self.instantiate_bot()
+            self.time_since_last_spawn = 0.0
