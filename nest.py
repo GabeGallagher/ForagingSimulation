@@ -45,7 +45,7 @@ class Nest(TimeStepObserver):
         bot = MicroBot(id)
         from interfaces.bot_interface import BotInterface
 
-        bot_interface = BotInterface(bot, self, self.location.copy())
+        bot_interface = BotInterface(bot, self, self.location.copy(), self.arena)
         self.bots[id] = bot_interface
         bot.set_bot_interface(bot_interface)
         self.bot_move_command(id)
@@ -58,7 +58,8 @@ class Nest(TimeStepObserver):
         bot: MicroBot = self.bots[bot_id].bot
         # TODO: refactor this to handle arenas with multiple targets. Works for now because there will always just be one
         bot_angle_to_target = self.get_new_bot_orientation(
-            bot_id, self.arena.targets[0].position
+            # bot_id, self.arena.targets[0].position
+            bot_id, [0.0, 0.2]
         )
         bot.rotate(
             bot_angle_to_target
@@ -73,11 +74,17 @@ class Nest(TimeStepObserver):
         return math.atan2(dx, dy)
 
     def handle_collision(self, other, location: list[float], bot_id: int) -> None:
-        print(f"Collided with {other.owner.__class__.__name__} at {other.position}")
         bot: MicroBot = self.bots[bot_id].bot
+        
+        # Handle wall collision
+        if isinstance(other, Arena):
+            print(f"Bot {bot_id} collided with arena wall at {location}")
+            return
+        
+        # Handle other collisions
+        print(f"Collided with {other.owner.__class__.__name__} at {other.position}")
         if isinstance(other.owner, Target):
             bot.collect_object(other.owner)
-        
         elif isinstance(other.owner, Nest):
             self.transfer_bot_inventory(bot_id)
 
