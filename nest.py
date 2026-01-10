@@ -2,11 +2,15 @@ from arena import Arena
 import random
 from colliders.collider import Collider
 from colliders.obstacle_collider import ObstacleCollider
+from enums.navigation_type import NavType
 from microbot import MicroBot
 from enums.bot_state import BotState
 from typing import Dict
 import math
 from collectables.target import Target
+from navigation.basic import BasicNavigation
+from navigation.navigation import Navigation
+from navigation.potential_field import PotentialField
 from time_step_observer import TimeStepObserver
 from typing import TYPE_CHECKING
 
@@ -18,12 +22,14 @@ if TYPE_CHECKING:
 
 
 class Nest(TimeStepObserver):
-    def __init__(self, arena: Arena, location: list[float]) -> None:
+    def __init__(self, arena: Arena, location: list[float], nav_type: NavType) -> None:
         super().__init__()
         self.arena = arena
         self.location = self.get_location(arena, location)
         self.bots: Dict[int, BotInterface] = {}
         self.target_tracker: int = 0
+        self.nav_type = nav_type
+        self.nav = self.get_navigator()
         self.instantiate_bot()
         self.collider: Collider = Collider(0.1, self.location, self)
         self.inventory = []
@@ -56,8 +62,27 @@ class Nest(TimeStepObserver):
     # TODO: look into better ways to generate unique id
     def generate_bot_id(self) -> int:
         return len(self.bots) - 1
+    
+    def get_navigator(self) -> Navigation:
+        match self.nav_type:
+            case NavType.POTENTIAL_FIELD:
+                return PotentialField(self.arena)
+            case NavType.BASIC:
+                return BasicNavigation(self.arena)
+            case _:
+                raise RuntimeError(f"Invalid or unimplemented navigation type: {self.nav_type}")
+
 
     def bot_move_command(self, bot_id) -> None:
+        match self.nav_type:
+            case NavType.POTENTIAL_FIELD:
+                self.nav.move()
+            case NavType.BASIC:
+                self.basic_movement(bot_id)
+            case _:
+                raise RuntimeError(f"Invalid or unimplemented navigation type: {self.nav_type}")
+
+    def basic_movement(self, bot_id: int) -> None:
         bot: MicroBot = self.bots[bot_id].bot
 
         if len(self.arena.targets) == 0:
@@ -82,6 +107,7 @@ class Nest(TimeStepObserver):
             bot_angle_to_target
         )  # calculate bot orientation and rotate relative to target
         bot.set_state(BotState.EXPLORING)
+
 
     def set_target_tracker(self) -> None:
         self.target_tracker += 1
@@ -145,7 +171,4 @@ class Nest(TimeStepObserver):
         bot.set_state(BotState.EXPLORING)
 
     def update(self, time_delta: float) -> None:
-        self.time_since_last_spawn += time_delta
-        if self.time_since_last_spawn >= 1.0 and len(self.arena.targets) > 0:
-            self.instantiate_bot()
-            self.time_since_last_spawn = 0.0
+        pass
