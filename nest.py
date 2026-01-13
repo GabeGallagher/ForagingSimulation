@@ -57,12 +57,12 @@ class Nest(TimeStepObserver):
         bot_interface = BotInterface(bot, self, self.location.copy(), self.arena)
         self.bots[id] = bot_interface
         bot.set_bot_interface(bot_interface)
-        self.bot_move_command(id)
+        self.bot_move_command(id, bot_interface)
 
     # TODO: look into better ways to generate unique id
     def generate_bot_id(self) -> int:
-        return len(self.bots) - 1
-    
+        return len(self.bots)
+
     def get_navigator(self) -> Navigation:
         match self.nav_type:
             case NavType.POTENTIAL_FIELD:
@@ -70,17 +70,55 @@ class Nest(TimeStepObserver):
             case NavType.BASIC:
                 return BasicNavigation(self.arena)
             case _:
-                raise RuntimeError(f"Invalid or unimplemented navigation type: {self.nav_type}")
+                print(f"{self.nav_type}")
+                raise RuntimeError(f"Invalid or unimplemented navigation type")
 
+    def get_target(self, bot_id: int) -> list[float]:
+        bot: MicroBot = self.bots[bot_id].bot
+        target_loc: list[float] = []
 
-    def bot_move_command(self, bot_id) -> None:
+        if len(bot.inventory) > 0:
+            bot.state = BotState.RETURNING
+
+        match bot.state:
+            case BotState.IDLE:
+                if len(self.arena.targets) > 0:
+                    target_loc = self.arena.target_locations[self.target_tracker]
+                    self.set_target_tracker()
+                else:
+                    return bot.interface.location
+            case BotState.EXPLORING:
+                target_loc = self.arena.target_locations[self.target_tracker]
+                self.set_target_tracker()
+            case BotState.RETURNING:
+                target_loc = self.location
+            case _:
+                print(f"{bot.state}")
+                raise RuntimeError(
+                    "Invalid bot state. Cannot select navigation priority"
+                )
+            
+        return target_loc
+
+    def bot_move_command(self, bot_id: int, bot_interface: "BotInterface") -> None:
+        bot: MicroBot = self.bots[bot_id].bot
+
         match self.nav_type:
             case NavType.POTENTIAL_FIELD:
-                self.nav.move()
+                self.nav.set_target(self.get_target(bot_id))
+                force = self.nav.get_direction(bot_interface.location)
+                bot_angle_to_target = math.atan2(force[0], force[1])
+                bot.rotate(bot_angle_to_target)
+                bot.set_state(BotState.EXPLORING)
+                print(
+                    f"bot_{bot_id} moving at angle {bot_angle_to_target} thanks to potential field algo"
+                )
             case NavType.BASIC:
                 self.basic_movement(bot_id)
             case _:
-                raise RuntimeError(f"Invalid or unimplemented navigation type: {self.nav_type}")
+                raise RuntimeError(
+                    f"Invalid or unimplemented navigation type: {self.nav_type}"
+                )
 
     def basic_movement(self, bot_id: int) -> None:
         bot: MicroBot = self.bots[bot_id].bot
@@ -108,7 +146,6 @@ class Nest(TimeStepObserver):
         )  # calculate bot orientation and rotate relative to target
         bot.set_state(BotState.EXPLORING)
 
-
     def set_target_tracker(self) -> None:
         self.target_tracker += 1
         if self.target_tracker > len(self.arena.targets) - 1:
@@ -127,12 +164,12 @@ class Nest(TimeStepObserver):
         # Handle wall collision
         if isinstance(other, Arena):
             print(f"Bot {bot_id} collided with arena wall at {location}")
-            self.bot_move_to_random(bot_id)
+            self.bot_move_command(bot_id, bot.interface)
             return
 
         if isinstance(other, ObstacleCollider):
             print(f"Bot {bot_id} collided with obstacle at {location}")
-            self.bot_move_to_random(bot_id)
+            self.bot_move_command(bot_id, bot.interface)
             return
 
         # Handle other collisions
@@ -145,7 +182,7 @@ class Nest(TimeStepObserver):
 
         elif isinstance(other.owner, MicroBot):
             # TODO: Implement better collision handling with other bots
-            self.bot_move_to_random(bot_id)
+            self.bot_move_command(bot_id, bot.interface)
 
     def transfer_bot_inventory(self, bot_id) -> None:
         bot: MicroBot = self.bots[bot_id].bot
