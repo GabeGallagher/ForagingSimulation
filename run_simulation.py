@@ -20,7 +20,7 @@ if __name__ == "__main__":
     )
     
     # Nest must init after sim manager
-    nest: Nest = Nest(arena, [0.2, 0.2], nav_type)
+    nest: Nest = Nest(arena, [0.2, 0.3], nav_type)
 
     sim.run_realtime_loop()
 

@@ -107,7 +107,7 @@ class Nest(TimeStepObserver):
             case NavType.POTENTIAL_FIELD:
                 self.nav.set_target(self.get_target(bot_id))
                 force = self.nav.get_direction(bot_interface.location)
-                bot_angle_to_target = math.atan2(force[0], force[1])
+                bot_angle_to_target = math.atan2(force[1], force[0])
                 bot.rotate(bot_angle_to_target)
                 bot.set_state(BotState.EXPLORING)
                 print(
@@ -208,4 +208,5 @@ class Nest(TimeStepObserver):
         bot.set_state(BotState.EXPLORING)
 
     def update(self, time_delta: float) -> None:
-        pass
+        for bot_id, bot_interface in self.bots.items():
+            self.bot_move_command(bot_id, bot_interface)

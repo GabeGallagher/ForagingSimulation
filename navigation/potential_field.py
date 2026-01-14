@@ -10,8 +10,8 @@ class PotentialField(Navigation):
         super().__init__()
         self.arena = arena
         self.k_att = 1.0
-        self.k_rep = 5.0
-        self.influence_dist = 2.0
+        self.k_rep = 2.0
+        self.influence_dist = 0.3
 
     def set_target(self, target_loc: list[float]) -> None:
         self.target: list[float] = target_loc
@@ -25,19 +25,21 @@ class PotentialField(Navigation):
         attractive_force = self.k_att * to_goal
 
         # Calculate repulsive force from obstacles
-        repulsive = np.zeros(2)
+        repulsive_force = np.zeros(2)
 
         for obs in self.arena.obstacles:
-            to_robot = np.array(obs.position) - pos
-            dist = np.linalg.norm(to_robot) - obs.radius
+            to_robot = pos - np.array(obs.position)
+            dist_to_obs_surface = np.linalg.norm(to_robot) - obs.radius
 
-            if dist < self.influence_dist and dist > 0.0:
+            if dist_to_obs_surface <= self.influence_dist:
                 print(f"influenced by obstacle at: {obs.position}")
-                repulsion_magnitude = (
-                    self.k_rep * (1 / dist - 1 / self.influence_dist) * (1 / dist**2)
+                repulsive_direction = to_robot / np.linalg.norm(to_robot)
+                magnitude = (
+                    self.k_rep
+                    * (1 / self.influence_dist - 1 / dist_to_obs_surface)
+                    * (1 / dist_to_obs_surface**2)
                 )
-                repulsion_direction = to_robot / np.linalg.norm(to_robot)
-                repulsive += repulsion_magnitude * repulsion_direction
+                repulsive_force += magnitude * repulsive_direction
 
         # Calculate repulsive force from walls
         distances = {
@@ -54,16 +56,21 @@ class PotentialField(Navigation):
             "left": np.array([1, 0]),
         }
 
-        for wall, dist in distances.items():
-            if dist < self.influence_dist and dist > 0.001:
+        for wall, dist_to_obs_surface in distances.items():
+            if (
+                dist_to_obs_surface < self.influence_dist
+                and dist_to_obs_surface > 0.001
+            ):
                 magnitude = (
-                    self.k_rep * (1 / dist - 1 / self.influence_dist) * (1 / dist**2)
+                    self.k_rep
+                    * (1 / dist_to_obs_surface - 1 / self.influence_dist)
+                    * (1 / dist_to_obs_surface**2)
                 )
-                repulsive += magnitude * directions[wall]
+                repulsive_force += magnitude * directions[wall]
 
-        total_force = attractive_force + repulsive
+        total_force = attractive_force + repulsive_force
 
         if np.linalg.norm(total_force) > 0.001:
-            return total_force / np.linalg.norm(total_force)
+            return total_force
         else:
             return np.zeros(2)

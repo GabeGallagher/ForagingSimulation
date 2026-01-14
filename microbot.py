@@ -22,7 +22,7 @@ class MicroBot(TimeStepObserver):
         self.width = length / 3
         self.orientation = 0.0
         self.state = BotState.IDLE
-        self.speed = 2e-1  # 20 cm/s - very fast microbot speed
+        self.speed = 2e-1  # 20 cm/s - fast microbot speed
         self.inventory = []
 
     def rotate(self, angle_radians) -> None:
