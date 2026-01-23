@@ -111,7 +111,7 @@ class Nest(TimeStepObserver):
                 bot.rotate(bot_angle_to_target)
                 bot.set_state(BotState.EXPLORING)
                 print(
-                    f"bot_{bot_id} moving at angle {bot_angle_to_target} thanks to potential field algo"
+                    f"bot_{bot_id} moving at angle {bot_angle_to_target} radians and {math.degrees(bot_angle_to_target)} degrees thanks to potential field algo"
                 )
             case NavType.BASIC:
                 self.basic_movement(bot_id)

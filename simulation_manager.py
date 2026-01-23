@@ -46,6 +46,8 @@ class SimulationManager:
         self.headless = headless
         self.fig, self.ax = plt.subplots(figsize=(arena_size[0], arena_size[1]))
         self.current_time: float = 0.0
+        self.paused: bool = False
+        self.speed_multiplier: float = 1.0
 
         self._initialized = True
 
@@ -75,13 +77,20 @@ class SimulationManager:
             last_time = time.time()
 
             while self.running:
-                current_time = time.time()
-                elapsed = current_time - last_time
+                if not self.paused:
+                    current_time = time.time()
+                    elapsed = current_time - last_time
 
-                while elapsed >= self.time_delta:
-                    self.step()
-                    elapsed -= self.time_delta
-                    last_time += self.time_delta
+                    while elapsed >= self.time_delta:
+                        self.step()
+                        elapsed -= self.time_delta
+                        last_time += self.time_delta
+
+                else:
+                    for _ in range(int(self.speed_multiplier)):
+                        self.step()
+                        elapsed -= self.time_delta
+                        last_time += self.time_delta
 
                 # Sleep to prevent busy waiting
                 time.sleep(0.001)  # 1ms sleep

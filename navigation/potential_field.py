@@ -11,7 +11,7 @@ class PotentialField(Navigation):
         self.arena = arena
         self.k_att = 1.0
         self.k_rep = 2.0
-        self.influence_dist = 0.3
+        self.influence_dist = 0.2
 
     def set_target(self, target_loc: list[float]) -> None:
         self.target: list[float] = target_loc
@@ -56,17 +56,17 @@ class PotentialField(Navigation):
             "left": np.array([1, 0]),
         }
 
-        for wall, dist_to_obs_surface in distances.items():
-            if (
-                dist_to_obs_surface < self.influence_dist
-                and dist_to_obs_surface > 0.001
-            ):
-                magnitude = (
-                    self.k_rep
-                    * (1 / dist_to_obs_surface - 1 / self.influence_dist)
-                    * (1 / dist_to_obs_surface**2)
-                )
-                repulsive_force += magnitude * directions[wall]
+        # for wall, dist_to_obs_surface in distances.items():
+        #     if (
+        #         dist_to_obs_surface < self.influence_dist
+        #         and dist_to_obs_surface > 0.001
+        #     ):
+        #         magnitude = (
+        #             self.k_rep
+        #             * (1 / dist_to_obs_surface - 1 / self.influence_dist)
+        #             * (1 / dist_to_obs_surface**2)
+        #         )
+        #         repulsive_force += magnitude * directions[wall]
 
         total_force = attractive_force + repulsive_force
 
