@@ -1,3 +1,4 @@
+import msvcrt
 from arena import Arena
 from nest import Nest
 import matplotlib.pyplot as plt
@@ -64,7 +65,7 @@ class SimulationManager:
             self.observers.remove(observer)
 
     def set_visualization_manager(self, framerate: int, nest: Nest) -> None:
-        self.viz = VisualizationManager(framerate, self.fig, self.ax, self.arena, nest)
+        self.viz = VisualizationManager(framerate, self.fig, self.ax, self.arena, nest, self.toggle_pause)
 
 
     def get_interval_miliseconds(self, time_delta) -> int:
@@ -94,6 +95,9 @@ class SimulationManager:
 
     def stop(self) -> None:
         self.running = False
+
+    def toggle_pause(self):
+        self.paused = not self.paused
 
     def step(self) -> None:
         self.current_time += self.time_delta

@@ -1,6 +1,7 @@
 import numpy as np
 from arena import Arena
 from nest import Nest
+from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle, Circle
 from matplotlib.animation import FuncAnimation
@@ -10,15 +11,17 @@ import matplotlib.pyplot as plt
 
 
 class VisualizationManager:
-    def __init__(self, framerate: int, fig, ax: Axes, arena: Arena, nest: Nest) -> None:
+    def __init__(self, framerate: int, fig: Figure, ax: Axes, arena: Arena, nest: Nest, pause_callback) -> None:
         super().__init__()
         self.frametime = self.get_frametime_miliseconds(framerate)
         self.fig = fig
+        self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
         self.ax = ax
         self.elapsed: float = 0.0
         self.last_draw: float = 0.0
         self.arena = arena
         self.nest = nest
+        self.pause_callback = pause_callback
 
     def get_frametime_miliseconds(self, framerate: int) -> int:
         return int(1000 / framerate)
@@ -132,3 +135,7 @@ class VisualizationManager:
         )
         plt.show()
         return anim
+    
+    def on_key_press(self, event):
+        if event.key == ' ':
+            self.pause_callback()
