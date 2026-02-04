@@ -110,9 +110,9 @@ class Nest(TimeStepObserver):
                 bot_angle_to_target = math.atan2(force[1], force[0])
                 bot.rotate(bot_angle_to_target)
                 bot.set_state(BotState.EXPLORING)
-                print(
-                    f"bot_{bot_id} moving at angle {bot_angle_to_target} radians and {math.degrees(bot_angle_to_target)} degrees thanks to potential field algo"
-                )
+                # print(
+                #     f"bot_{bot_id} moving at angle {bot_angle_to_target} radians and {math.degrees(bot_angle_to_target)} degrees thanks to potential field algo"
+                # )
             case NavType.BASIC:
                 self.basic_movement(bot_id)
             case _:
@@ -163,17 +163,17 @@ class Nest(TimeStepObserver):
 
         # Handle wall collision
         if isinstance(other, Arena):
-            print(f"Bot {bot_id} collided with arena wall at {location}")
+            # print(f"Bot {bot_id} collided with arena wall at {location}")
             self.bot_move_command(bot_id, bot.interface)
             return
 
         if isinstance(other, ObstacleCollider):
-            print(f"Bot {bot_id} collided with obstacle at {location}")
+            # print(f"Bot {bot_id} collided with obstacle at {location}")
             self.bot_move_command(bot_id, bot.interface)
             return
 
         # Handle other collisions
-        print(f"Collided with {other.owner.__class__.__name__} at {other.position}")
+        # print(f"Collided with {other.owner.__class__.__name__} at {other.position}")
         if isinstance(other.owner, Target):
             bot.collect_object(other.owner)
 

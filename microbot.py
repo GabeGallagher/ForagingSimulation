@@ -34,7 +34,7 @@ class MicroBot(TimeStepObserver):
 
     def set_state(self, state: BotState) -> None:
         self.state = state
-        print(f"Bot: {self.id} changing to {self.state}")
+        # print(f"Bot: {self.id} changing to {self.state}")
 
     def move(self, time_delta: float) -> None:
         dx = self.speed * time_delta * math.sin(self.orientation)

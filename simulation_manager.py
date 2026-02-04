@@ -86,12 +86,6 @@ class SimulationManager:
                         elapsed -= self.time_delta
                         last_time += self.time_delta
 
-                else:
-                    for _ in range(int(self.speed_multiplier)):
-                        self.step()
-                        elapsed -= self.time_delta
-                        last_time += self.time_delta
-
                 # Sleep to prevent busy waiting
                 time.sleep(0.001)  # 1ms sleep
         

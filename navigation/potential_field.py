@@ -17,7 +17,7 @@ class PotentialField(Navigation):
         self.target: list[float] = target_loc
 
     def get_direction(self, bot_position: list[float]) -> NDArray:
-        print("Potential field Nav active")
+        # print("Potential field Nav active")
         # Calculate attractive force to target
         pos = np.array(bot_position)
         goal = np.array(self.target)
@@ -32,7 +32,7 @@ class PotentialField(Navigation):
             dist_to_obs_surface = np.linalg.norm(to_robot) - obs.radius
 
             if dist_to_obs_surface <= self.influence_dist:
-                print(f"influenced by obstacle at: {obs.position}")
+                # print(f"influenced by obstacle at: {obs.position}")
                 repulsive_direction = to_robot / np.linalg.norm(to_robot)
                 magnitude = (
                     self.k_rep
