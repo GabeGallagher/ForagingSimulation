@@ -1,13 +1,23 @@
 import numpy as np
+from typing import Optional
 from arena import Arena
 from nest import Nest
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle, Circle
 from matplotlib.animation import FuncAnimation
+from matplotlib.widgets import CheckButtons
 import matplotlib.pyplot as plt
+from enums.bot_state import BotState
 
 """Visualize simulation"""
+
+STATE_COLORS = {
+    BotState.IDLE: "lightgray",
+    BotState.EXPLORING: "lightblue",
+    BotState.RETURNING: "gold",
+    BotState.BLOCKED: "salmon",
+}
 
 
 class VisualizationManager:
@@ -22,6 +32,30 @@ class VisualizationManager:
         self.arena = arena
         self.nest = nest
         self.pause_callback = pause_callback
+        self.overlay_keys = ["force", "heading", "state", "target", "influence"]
+        self.overlay_labels = [
+            "Force vectors",
+            "Headings",
+            "State colors",
+            "Target lines",
+            "Influence zones",
+        ]
+        self.overlays = {key: False for key in self.overlay_keys}
+        self._build_overlay_controls()
+
+    def _build_overlay_controls(self) -> None:
+        check_ax = self.fig.add_axes((0.005, 0.7, 0.17, 0.26))
+        check_ax.set_facecolor("whitesmoke")
+        self.overlay_check = CheckButtons(
+            check_ax, self.overlay_labels, list(self.overlays.values())
+        )
+        self.overlay_check.on_clicked(self._on_overlay_toggle)
+
+    def _on_overlay_toggle(self, label: Optional[str]) -> None:
+        if label is None:
+            return
+        key = self.overlay_keys[self.overlay_labels.index(label)]
+        self.overlays[key] = not self.overlays[key]
 
     def get_frametime_miliseconds(self, framerate: int) -> int:
         return int(1000 / framerate)
@@ -51,6 +85,12 @@ class VisualizationManager:
                 length = ibot.bot.length
                 width = ibot.bot.width
                 orientation = ibot.bot.orientation
+
+                # State-color overlay: tint the body by BotState, else default.
+                if self.overlays["state"]:
+                    facecolor = STATE_COLORS.get(ibot.bot.state, "lightblue")
+                else:
+                    facecolor = "lightblue"
 
                 # Convert orientation to degrees for matplotlib
                 angle_deg = 90 - (orientation * 180 / np.pi)
@@ -82,7 +122,7 @@ class VisualizationManager:
                     width,
                     linewidth=1,
                     edgecolor="blue",
-                    facecolor="lightblue",
+                    facecolor=facecolor,
                     alpha=0.7,
                     angle=angle_deg,  # Use the orientation directly in degrees
                 )
@@ -113,6 +153,65 @@ class VisualizationManager:
                 )
                 self.ax.add_patch(circle)
 
+    def draw_force_vectors(self, nest: Nest) -> None:
+        for ibot in nest.bots.values():
+            force = ibot.debug_force
+            if force is None:
+                continue
+            magnitude = float(np.linalg.norm(force))
+            if magnitude < 1e-9:
+                continue
+            length = 0.12
+            ux, uy = force[0] / magnitude, force[1] / magnitude
+            self.ax.arrow(
+                ibot.x, ibot.y, ux * length, uy * length,
+                head_width=0.02, head_length=0.02,
+                fc="red", ec="red", length_includes_head=True, zorder=5,
+            )
+
+    def draw_headings(self, nest: Nest) -> None:
+        for ibot in nest.bots.values():
+            orientation = ibot.bot.orientation
+            length = 0.1
+            ux, uy = np.sin(orientation), np.cos(orientation)
+            self.ax.arrow(
+                ibot.x, ibot.y, ux * length, uy * length,
+                head_width=0.02, head_length=0.02,
+                fc="green", ec="green", length_includes_head=True, zorder=5,
+            )
+
+    def draw_target_lines(self, nest: Nest) -> None:
+        for ibot in nest.bots.values():
+            target = ibot.debug_target
+            if target is None:
+                continue
+            self.ax.plot(
+                [ibot.x, target[0]], [ibot.y, target[1]],
+                linestyle="--", color="purple", alpha=0.5, linewidth=1, zorder=3,
+            )
+
+    def draw_influence_zones(self, arena: Arena, nest: Nest) -> None:
+        influence_dist = getattr(nest.nav, "influence_dist", None)
+        if influence_dist is None:
+            return
+        for obstacle in arena.obstacles:
+            ring = Circle(
+                (obstacle.position[0], obstacle.position[1]),
+                obstacle.radius + influence_dist,
+                fill=False, linestyle=":", edgecolor="orange", alpha=0.6, zorder=2,
+            )
+            self.ax.add_patch(ring)
+
+    def draw_overlays(self, arena: Arena, nest: Nest) -> None:
+        if self.overlays["influence"]:
+            self.draw_influence_zones(arena, nest)
+        if self.overlays["target"]:
+            self.draw_target_lines(nest)
+        if self.overlays["force"]:
+            self.draw_force_vectors(nest)
+        if self.overlays["heading"]:
+            self.draw_headings(nest)
+
     def visualize_simulation(self, arena: Arena, nest: Nest) -> None:
         self.draw_nest(nest.location)
         self.draw_bots(nest)
@@ -123,6 +222,7 @@ class VisualizationManager:
     def update_frame(self, frame) -> list:
         self.ax.clear()
         self.visualize_simulation(self.arena, self.nest)
+        self.draw_overlays(self.arena, self.nest)
         return []
 
     def animate_simulation(self) -> FuncAnimation:

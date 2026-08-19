@@ -5,6 +5,7 @@ from enums.bot_state import BotState
 from microbot import MicroBot
 from nest import Nest
 from arena import Arena
+from numpy.typing import NDArray
 
 
 class BotInterface:
@@ -15,6 +16,11 @@ class BotInterface:
         self.nest: Nest = nest
         self.location: list[float] = location
         self.arena: Arena = arena
+
+        # Debug state: the force/target the sim actually used most recently.
+        # Written by the nest each frame, read (never mutated) by overlays.
+        self.debug_force: NDArray | None = None
+        self.debug_target: list[float] | None = None
 
     def report_collision(self, other) -> None:
         self.nest.handle_collision(other, self.location, self.bot.id)
