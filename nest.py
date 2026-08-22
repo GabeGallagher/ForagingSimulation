@@ -111,8 +111,6 @@ class Nest(TimeStepObserver):
                 bot_angle_to_target = math.atan2(force[1], force[0])
                 bot.rotate(bot_angle_to_target)
                 bot.set_state(BotState.EXPLORING)
-                # Stash what we actually used so debug overlays can read it
-                # without re-running the (side-effecting) navigation logic.
                 bot_interface.debug_force = force
                 bot_interface.debug_target = target
                 # print(

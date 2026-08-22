@@ -32,13 +32,14 @@ class VisualizationManager:
         self.arena = arena
         self.nest = nest
         self.pause_callback = pause_callback
-        self.overlay_keys = ["force", "heading", "state", "target", "influence"]
+        self.overlay_keys = ["force", "heading", "state", "target", "influence", "bot_locations"]
         self.overlay_labels = [
             "Force vectors",
             "Headings",
             "State colors",
             "Target lines",
             "Influence zones",
+            "Show Bot Locations",
         ]
         self.overlays = {key: False for key in self.overlay_keys}
         self._build_overlay_controls()
@@ -202,6 +203,20 @@ class VisualizationManager:
             )
             self.ax.add_patch(ring)
 
+    def draw_bot_locations(self, nest: Nest) -> None:
+        label_offset = 0.01
+        for ibot in nest.bots.values():
+            self.ax.text(
+                ibot.x,
+                ibot.y + label_offset,
+                f"({ibot.x:.3f}, {ibot.y:.3f})",
+                ha="center",
+                va="bottom",
+                fontsize=8,
+                color="black",
+                zorder=6,
+            )
+
     def draw_overlays(self, arena: Arena, nest: Nest) -> None:
         if self.overlays["influence"]:
             self.draw_influence_zones(arena, nest)
@@ -211,6 +226,8 @@ class VisualizationManager:
             self.draw_force_vectors(nest)
         if self.overlays["heading"]:
             self.draw_headings(nest)
+        if self.overlays["bot_locations"]:
+            self.draw_bot_locations(nest)
 
     def visualize_simulation(self, arena: Arena, nest: Nest) -> None:
         self.draw_nest(nest.location)

@@ -45,7 +45,7 @@ class SimulationManager:
         self.arena.instantiate_targets()
         self.arena.instantiate_obstacles()
         self.headless = headless
-        self.fig, self.ax = plt.subplots(figsize=(arena_size[0], arena_size[1]))
+        self.fig, self.ax = plt.subplots(figsize=(arena_size[0] * 1.4, arena_size[1]))
         self.current_time: float = 0.0
         self.last_time = 0.0
         self.paused: bool = False
