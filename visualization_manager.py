@@ -250,7 +250,7 @@ class VisualizationManager:
             blit=False,
             cache_frame_data=False,
         )
-        plt.show()
+        plt.show(block=True)
         return anim
     
     def on_key_press(self, event):

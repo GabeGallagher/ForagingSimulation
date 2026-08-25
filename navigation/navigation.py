@@ -11,5 +11,5 @@ class Navigation(ABC):
         pass
 
     @abstractmethod
-    def get_direction(self, bot_position: list[float]) -> NDArray:
+    def get_direction(self, bot_position: list[float], bot_rotation: float) -> float:
         pass

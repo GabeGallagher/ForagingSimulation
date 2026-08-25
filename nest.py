@@ -107,11 +107,9 @@ class Nest(TimeStepObserver):
             case NavType.POTENTIAL_FIELD:
                 target = self.get_target(bot_id)
                 self.nav.set_target(target)
-                force = self.nav.get_direction(bot_interface.location)
-                bot_angle_to_target = math.atan2(force[1], force[0])
-                bot.rotate(bot_angle_to_target)
+                rotation = self.nav.get_direction(bot_interface.location, bot.orientation)
+                bot.rotate(rotation)
                 bot.set_state(BotState.EXPLORING)
-                bot_interface.debug_force = force
                 bot_interface.debug_target = target
                 # print(
                 #     f"bot_{bot_id} moving at angle {bot_angle_to_target} radians and {math.degrees(bot_angle_to_target)} degrees thanks to potential field algo"

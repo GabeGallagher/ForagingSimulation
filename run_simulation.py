@@ -25,7 +25,8 @@ if __name__ == "__main__":
     sim.run_realtime_loop()
 
     if headless:
-        pass
+        for _ in range(400):
+            sim.step()
     else:
         sim.set_visualization_manager(framerate, nest)
         sim.viz.animate_simulation()
