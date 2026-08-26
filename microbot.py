@@ -63,6 +63,14 @@ class MicroBot(TimeStepObserver):
         else:
             self.interface.report_unable_to_collect(obj)
 
+    def destroy_self(self) -> None:
+        from simulation_manager import SimulationManager
+
+        self.collider.destroy()
+        sim_manager = SimulationManager.get_instance()
+        if sim_manager is not None:
+            sim_manager.unsubscribe(self)
+
     def update(self, time_delta: float) -> None:
         match self.state:
             case BotState.EXPLORING:

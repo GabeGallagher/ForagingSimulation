@@ -20,6 +20,5 @@ class Collider:
     def destroy(self) -> None:
         if self.manager is not None:
             self.manager.remove_collider(self)
-            self = None
         else:
             raise RuntimeError("CollisionManager instance not found in destroy function")

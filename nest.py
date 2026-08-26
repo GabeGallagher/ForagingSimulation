@@ -109,7 +109,8 @@ class Nest(TimeStepObserver):
                 self.nav.set_target(target)
                 rotation = self.nav.get_direction(bot_interface.location, bot.orientation)
                 bot.rotate(rotation)
-                bot.set_state(BotState.EXPLORING)
+                if bot.state == BotState.IDLE:
+                    bot.set_state(BotState.EXPLORING)
                 bot_interface.debug_target = target
                 # print(
                 #     f"bot_{bot_id} moving at angle {bot_angle_to_target} radians and {math.degrees(bot_angle_to_target)} degrees thanks to potential field algo"
@@ -180,6 +181,7 @@ class Nest(TimeStepObserver):
 
         elif isinstance(other.owner, Nest):
             self.transfer_bot_inventory(bot_id)
+            self.destroy_bot(bot_id)
 
         elif isinstance(other.owner, MicroBot):
             # TODO: Implement better collision handling with other bots
@@ -207,6 +209,14 @@ class Nest(TimeStepObserver):
         bot_random_angle: float = self.get_new_bot_orientation(bot_id, [ran_x, ran_y])
         bot.rotate(bot_random_angle)
         bot.set_state(BotState.EXPLORING)
+
+    def destroy_bot(self, bot_id: int) -> None:
+        if bot_id not in self.bots.keys():
+            print(f"{bot_id} not in nest's bot dict")
+        else:
+            bot: MicroBot = self.bots[bot_id].bot
+            self.bots.pop(bot_id)
+            bot.destroy_self()
 
     def update(self, time_delta: float) -> None:
         for bot_id, bot_interface in self.bots.items():
