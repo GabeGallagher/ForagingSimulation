@@ -11,5 +11,5 @@ class BasicNavigation(Navigation):
     def set_target(self, target_loc: list[float]) -> None:
         pass
 
-    def get_direction(self, bot_position: list[float]) -> NDArray:
-        return np.zeros(2)
+    def get_direction(self, bot_position: list[float], bot_rotation: float) -> float:
+        return 0.0

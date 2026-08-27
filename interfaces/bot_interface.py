@@ -26,11 +26,11 @@ class BotInterface:
         self.nest.handle_collision(other, self.location, self.bot.id)
 
     def set_location(self, location: list[float]) -> None:
-        new_x = self.location[0] + location[0]
-        new_y = self.location[1] + location[1]
+        new_x: float = self.location[0] + location[0]
+        new_y: float = self.location[1] + location[1]
 
         # Get bot radius for boundary checking
-        bot_radius = self.bot.collider.radius
+        bot_radius: float = self.bot.collider.radius
 
         # Check arena boundaries and clamp position
         if new_x - bot_radius < 0:

@@ -8,7 +8,7 @@ class Arena:
     # dimensions: list[float] of arena x/y in meters
     def __init__(
         self,
-        dimensions,
+        dimensions: list[float],
         target_locations: list[list[float]],
         obstacle_locations: list[list[float]],
     ) -> None:

@@ -1,9 +1,9 @@
 from collision_manager import CollisionManager
 
 class Collider:
-    def __init__(self, radius, position, owner=None) -> None:
-        self.radius = radius
-        self.position = position
+    def __init__(self, radius: float, position, owner=None) -> None:
+        self.radius: float = radius
+        self.position: list[float] = position
         self.owner = owner
 
         self.manager: CollisionManager | None = CollisionManager.get_instance()

@@ -24,15 +24,15 @@ if TYPE_CHECKING:
 class Nest(TimeStepObserver):
     def __init__(self, arena: Arena, location: list[float], nav_type: NavType) -> None:
         super().__init__()
-        self.arena = arena
-        self.location = self.get_location(arena, location)
+        self.arena: Arena = arena
+        self.location: list[float] = self.get_location(arena, location)
         self.bots: Dict[int, BotInterface] = {}
         self.target_tracker: int = 0
-        self.nav_type = nav_type
-        self.nav = self.get_navigator()
+        self.nav_type: NavType = nav_type
+        self.nav: Navigation = self.get_navigator()
         self.instantiate_bot()
         self.collider: Collider = Collider(0.1, self.location, self)
-        self.inventory = []
+        self.inventory: list = []
         self.time_since_last_spawn: float = 0.0
 
     """Gets location within the simulation arena. If location is known,

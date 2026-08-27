@@ -17,13 +17,13 @@ the brain"""
 class MicroBot(TimeStepObserver):
     def __init__(self, id, length=1e-2) -> None:
         super().__init__()
-        self.id = id
-        self.length = length
-        self.width = length / 3
-        self.orientation = 0.0
-        self.state = BotState.IDLE
-        self.speed = 2e-1  # 20 cm/s - fast microbot speed
-        self.inventory = []
+        self.id: int = id
+        self.length: float = length
+        self.width: float = length / 3
+        self.orientation: float = 0.0
+        self.state: BotState = BotState.IDLE
+        self.speed: float = 2e-1  # 20 cm/s - fast microbot speed
+        self.inventory: list = []
 
     def rotate(self, angle_radians) -> None:
         self.orientation = angle_radians
