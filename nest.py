@@ -30,6 +30,7 @@ class Nest(TimeStepObserver):
         self.target_tracker: int = 0
         self.nav_type: NavType = nav_type
         self.nav: Navigation = self.get_navigator()
+        self.next_bot_id: int = 0
         self.instantiate_bot()
         self.collider: Collider = Collider(0.1, self.location, self)
         self.inventory: list = []
@@ -50,18 +51,29 @@ class Nest(TimeStepObserver):
             return [x_pos, y_pos]
 
     def instantiate_bot(self) -> None:
-        id = self.generate_bot_id()
-        bot = MicroBot(id)
+        id: int = self.generate_bot_id()
+        bot: MicroBot = MicroBot(id)
         from interfaces.bot_interface import BotInterface
 
-        bot_interface = BotInterface(bot, self, self.location.copy(), self.arena)
+        if id in self.bots:
+            raise RuntimeError(f"Bot id {id} already in use; refusing to overwrite")
+
+        bot_interface: BotInterface = BotInterface(
+            bot, self, self.location.copy(), self.arena
+        )
         self.bots[id] = bot_interface
         bot.set_bot_interface(bot_interface)
         self.bot_move_command(id, bot_interface)
 
-    # TODO: look into better ways to generate unique id
+    """Bot ids are drawn from a monotonic counter, never reused. Reusing ids
+    (e.g. len(self.bots)) collides after destroy_bot pops from the dict, which
+    silently overwrites a live bot in self.bots while leaving it subscribed to
+    the SimulationManager and registered with the CollisionManager."""
+
     def generate_bot_id(self) -> int:
-        return len(self.bots)
+        bot_id: int = self.next_bot_id
+        self.next_bot_id += 1
+        return bot_id
 
     def get_navigator(self) -> Navigation:
         match self.nav_type:
