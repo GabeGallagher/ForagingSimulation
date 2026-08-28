@@ -23,16 +23,16 @@ class PotentialField(Navigation):
         dx = self.attractive_strength * np.sin(theta_target)
         dy = self.attractive_strength * np.cos(theta_target)
 
-        obs = self.arena.obstacles[0]
-        d_obs = np.linalg.norm(np.array(obs.position) - np.array(bot_position))
-        theta_obs = np.arctan2(obs.position[0] - bot_position[0], obs.position[1] - bot_position[1])
+        for obs in self.arena.obstacles:
+            d_obs = np.linalg.norm(np.array(obs.position) - np.array(bot_position))
+            theta_obs = np.arctan2(obs.x - bot_position[0], obs.y - bot_position[1])
 
-        if d_obs <= obs.radius:
-            dx = np.sign(np.sin(theta_obs))
-            dy = np.sign(np.cos(theta_obs))
-        elif d_obs < obs.radius + self.influence_dist:
-            dx += -self.beta * (self.influence_dist + obs.radius - d_obs) * np.sin(theta_obs)
-            dy += -self.beta * (self.influence_dist + obs.radius - d_obs) * np.cos(theta_obs)
+            if d_obs <= obs.radius:
+                dx = np.sign(np.sin(theta_obs))
+                dy = np.sign(np.cos(theta_obs))
+            elif d_obs < obs.radius + self.influence_dist:
+                dx += -self.beta * (self.influence_dist + obs.radius - d_obs) * np.sin(theta_obs)
+                dy += -self.beta * (self.influence_dist + obs.radius - d_obs) * np.cos(theta_obs)
 
         rotation: float = np.arctan2(dx, dy)
         

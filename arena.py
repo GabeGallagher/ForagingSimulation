@@ -10,13 +10,13 @@ class Arena:
         self,
         dimensions: list[float],
         target_locations: list[list[float]],
-        obstacle_locations: list[list[float]],
+        obstacle_specs: list[list[float]],
     ) -> None:
         self._x: float = dimensions[0]
         self._y: float = dimensions[1]
         self.target_locations: list[list[float]] = target_locations
         self.targets: list[Target] = []
-        self.obstacle_locations: list[list[float]] = obstacle_locations
+        self.obstacle_specs: list[list[float]] = obstacle_specs
         self.obstacles: list[ObstacleCollider] = []
 
     @property
@@ -38,8 +38,10 @@ class Arena:
             self.targets.append(target)
 
     def instantiate_obstacles(self) -> None:
-        for obstacle_location in self.obstacle_locations:
+        for obs in self.obstacle_specs:
+            pos_x: float = obs[0]
+            pos_y: float = obs[1]
             obstacle: ObstacleCollider = ObstacleCollider(
-                radius=0.1, position=obstacle_location, owner=None
+                radius=obs[2], position=[pos_x, pos_y], owner=None
             )
             self.obstacles.append(obstacle)

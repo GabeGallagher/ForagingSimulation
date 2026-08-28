@@ -12,6 +12,14 @@ class Collider:
         else:
             raise RuntimeError("CollisionManager instance not found.")
 
+    @property
+    def x(self) -> float:
+        return self.position[0]
+
+    @property
+    def y(self) -> float:
+        return self.position[1]
+
     def on_collision(self, other) -> None:
         from collectables.target import Target
         if isinstance(other.owner, Target) and self.owner is not None:
