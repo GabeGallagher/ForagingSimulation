@@ -44,3 +44,7 @@ venv.bak/
 # OS
 .DS_Store
 Thumbs.db
+
+# Debug
+debug_observer.py
+last_run_config.json
