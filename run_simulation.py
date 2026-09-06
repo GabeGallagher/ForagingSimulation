@@ -33,7 +33,7 @@ if __name__ == "__main__":
     target_locations = [[0.8, 0.8]]
     obstacle_count = 5
     obstacle_specs = []
-    rand_sim = True
+    rand_sim = False
     # Only used when rand_sim is False. Point at LAST_RUN_CONFIG to replay the
     # previous run, or at a saved copy to reload an interesting setup.
     config_path = LAST_RUN_CONFIG
@@ -53,7 +53,7 @@ if __name__ == "__main__":
         obstacle_count = len(obstacle_specs)
 
     arena = Arena([1, 1], target_locations, obstacle_specs)
-    arena_size = [10, 10]
+    arena_size = [7, 7]
     headless = False
     nav_type = NavType.POTENTIAL_FIELD
 

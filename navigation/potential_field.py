@@ -12,7 +12,7 @@ class PotentialField(Navigation):
         self.arena = arena
         self.attractive_strength = 0.2
         self.influence_dist = 0.2
-        self.beta = .75
+        self.beta = 1
 
     def set_target(self, target_loc: list[float]) -> None:
         self.target: list[float] = target_loc
