@@ -34,6 +34,21 @@ class PotentialField(Navigation):
                 dx += -self.beta * (self.influence_dist + obs.radius - d_obs) * np.sin(theta_obs)
                 dy += -self.beta * (self.influence_dist + obs.radius - d_obs) * np.cos(theta_obs)
 
+        d_left = bot_position[0]
+        d_right = self.arena.x - bot_position[0]
+        d_bottom = bot_position[1]
+        d_top = self.arena.y - bot_position[1]
+
+        if d_left < self.influence_dist:
+            dx += self.beta * (self.influence_dist - d_left)
+        if d_right < self.influence_dist:
+            dx -= self.beta * (self.influence_dist - d_right)
+        if d_bottom < self.influence_dist:
+            dy += self.beta * (self.influence_dist - d_bottom)
+        if d_top < self.influence_dist:
+            dy -= self.beta * (self.influence_dist - d_top)
+
+
         rotation: float = np.arctan2(dx, dy)
         
         return rotation
