@@ -1,8 +1,10 @@
 """Contains information about the bots that the bots themselves
 should not be privy to."""
 
+from collections import deque
 from enums.bot_state import BotState
 from microbot import MicroBot
+from navigation.boundary_follow import BoundaryFollow
 from nest import Nest
 from arena import Arena
 from numpy.typing import NDArray
@@ -16,6 +18,8 @@ class BotInterface:
         self.nest: Nest = nest
         self.location: list[float] = location
         self.arena: Arena = arena
+        self.recent_positions: deque[list[float]] = deque()
+        self.follow: BoundaryFollow | None = None
 
         # Debug state: the force/target the sim actually used most recently.
         # Written by the nest each frame, read (never mutated) by overlays.

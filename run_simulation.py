@@ -36,8 +36,8 @@ if __name__ == "__main__":
     # Only used when rand_sim is False. Point at LAST_RUN_CONFIG to replay the
     # previous run, or at a saved copy to reload an interesting setup.
     # LAST_RUN_CONFIG = "last_run_config.json"
-    LAST_RUN_CONFIG = "large_obs_on_top_of_nest.json"
-    config_path = "test_arenas/" + LAST_RUN_CONFIG
+    LAST_RUN_CONFIG = "obs_covering_nest_center"
+    config_path = "test_arenas/" + LAST_RUN_CONFIG + ".json"
 
     if rand_sim:
         # randomly gens obstacles. Doesn't account for overlap

@@ -33,6 +33,8 @@ class Nest(TimeStepObserver):
         self.next_bot_id: int = 0
         self.radius: float = 0.1
         self.spawn_margin: float = 0.01
+        self.stuck_window: int = 40
+        self.stuck_distance: float = 0.02
         self.instantiate_bot()
         self.collider: Collider = Collider(self.radius, self.location, self)
         self.inventory: list = []
@@ -160,7 +162,7 @@ class Nest(TimeStepObserver):
             case NavType.POTENTIAL_FIELD:
                 target = self.get_target(bot_id)
                 self.nav.set_target(target)
-                rotation = self.nav.get_direction(bot_interface.location, bot.orientation)
+                rotation = self.nav.get_bot_direction(bot_interface, self.is_stuck(bot_interface))
                 bot.rotate(rotation)
                 if bot.state == BotState.IDLE:
                     bot.set_state(BotState.EXPLORING)
@@ -174,6 +176,26 @@ class Nest(TimeStepObserver):
                 raise RuntimeError(
                     f"Invalid or unimplemented navigation type: {self.nav_type}"
                 )
+
+    """A bot is stuck when its net movement over the last stuck_window
+    updates is under stuck_distance"""
+
+    def is_stuck(self, bot_interface: "BotInterface") -> bool:
+        positions = bot_interface.recent_positions
+        return (
+            len(positions) == self.stuck_window
+            and math.dist(positions[0], positions[-1]) < self.stuck_distance
+        )
+
+    def record_position(self, bot_interface: "BotInterface") -> None:
+        positions = bot_interface.recent_positions
+        positions.append(bot_interface.location.copy())
+        if len(positions) > self.stuck_window:
+            positions.popleft()
+
+    def end_boundary_follow(self, bot_interface: "BotInterface") -> None:
+        bot_interface.follow = None
+        bot_interface.recent_positions.clear()
 
     def basic_movement(self, bot_id: int) -> None:
         bot: MicroBot = self.bots[bot_id].bot
@@ -273,4 +295,5 @@ class Nest(TimeStepObserver):
 
     def update(self, time_delta: float) -> None:
         for bot_id, bot_interface in self.bots.items():
+            self.record_position(bot_interface)
             self.bot_move_command(bot_id, bot_interface)
