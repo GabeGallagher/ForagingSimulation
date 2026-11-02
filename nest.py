@@ -1,5 +1,6 @@
 from arena import Arena
 import random
+from colliders.boundary_collider import BoundaryCollider
 from colliders.collider import Collider
 from colliders.obstacle_collider import ObstacleCollider
 from enums.navigation_type import NavType
@@ -239,7 +240,7 @@ class Nest(TimeStepObserver):
         bot: MicroBot = self.bots[bot_id].bot
 
         # Handle wall collision
-        if isinstance(other, Arena):
+        if isinstance(other, BoundaryCollider):
             # print(f"Bot {bot_id} collided with arena wall at {location}")
             self.bot_move_command(bot_id, bot.interface)
             return

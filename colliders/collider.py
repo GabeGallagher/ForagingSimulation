@@ -1,6 +1,8 @@
 from collision_manager import CollisionManager
 
 class Collider:
+    movable: bool = False
+
     def __init__(self, radius: float, position, owner=None) -> None:
         self.radius: float = radius
         self.position: list[float] = position

@@ -2,7 +2,6 @@
 should not be privy to."""
 
 from collections import deque
-from enums.bot_state import BotState
 from microbot import MicroBot
 from navigation.boundary_follow import BoundaryFollow
 from nest import Nest
@@ -30,33 +29,8 @@ class BotInterface:
         self.nest.handle_collision(other, self.location, self.bot.id)
 
     def set_location(self, location: list[float]) -> None:
-        new_x: float = self.location[0] + location[0]
-        new_y: float = self.location[1] + location[1]
-
-        # Get bot radius for boundary checking
-        bot_radius: float = self.bot.collider.radius
-
-        # Check arena boundaries and clamp position
-        if new_x - bot_radius < 0:
-            self.bot.set_state(BotState.IDLE)
-            self.location[0] = new_x = 0
-            self.report_collision(self.arena)
-        elif new_x + bot_radius > self.arena.x:
-            self.bot.set_state(BotState.IDLE)
-            self.location[0] = new_x = self.arena.x
-            self.report_collision(self.arena)
-
-        if new_y - bot_radius < 0:
-            self.bot.set_state(BotState.IDLE)
-            self.location[1] = new_y = 0
-            self.report_collision(self.arena)
-        elif new_y + bot_radius > self.arena.y:
-            self.bot.set_state(BotState.IDLE)
-            self.location[1] = new_y = self.arena.y
-            self.report_collision(self.arena)
-
-        self.location[0] = new_x
-        self.location[1] = new_y
+        self.location[0] += location[0]
+        self.location[1] += location[1]
 
     @property
     def x(self) -> float:

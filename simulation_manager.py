@@ -35,13 +35,19 @@ class SimulationManager:
         # Initialize observers list FIRST, before anything else
         self.observers: List[TimeStepObserver] = []
         # Collision manager must be initialized before any possible colliders
+        # targets, obstacles, and walls are among possible colliders
         self.collision_manager: CollisionManager = CollisionManager()
+        # Physics resolves after everything else has moved each step (see step),
+        # so no step ever ends with a bot past a wall
+        self.unsubscribe(self.collision_manager)
 
         self.time_delta: float = td
         self.target_locations: list[list[float]] = target_locations
         self.arena: Arena = arena
+        # Colliders
         self.arena.instantiate_targets()
         self.arena.instantiate_obstacles()
+        self.arena.instantiate_walls()
         self.headless = headless
         self.fig, self.ax = plt.subplots(figsize=(arena_size[0] * 1.4, arena_size[1]))
         self.current_time: float = 0.0
@@ -113,3 +119,5 @@ class SimulationManager:
                 # TODO: figure out why this is called every frame and fix
                 # UPDATE: I believe this is happening because there are errors that are failing silently
                 raise RuntimeError(f"Error updating observer {observer}: {e}")
+
+        self.collision_manager.update(self.time_delta)

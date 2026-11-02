@@ -1,6 +1,7 @@
 """Area or Arena in which the simulation takes place"""
 
 from collectables.target import Target
+from colliders.boundary_collider import BoundaryCollider
 from colliders.obstacle_collider import ObstacleCollider
 
 
@@ -30,6 +31,9 @@ class Arena:
     @property
     def y(self) -> float:
         return self._y
+
+    def instantiate_walls(self) -> None:
+        self.walls: BoundaryCollider = BoundaryCollider(self._x, self._y, owner=self)
 
     def instantiate_targets(self) -> None:
         for target_location in self.target_locations:

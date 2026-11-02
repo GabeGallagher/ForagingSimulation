@@ -9,6 +9,8 @@ if TYPE_CHECKING:
 
 
 class MicroBotCollider(Collider):
+    movable: bool = True
+
     def __init__(self, radius: float, position: list[float], owner: MicroBot) -> None:
         super().__init__(radius, position, owner)
         self.microbot: MicroBot = owner

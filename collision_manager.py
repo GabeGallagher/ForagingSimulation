@@ -34,6 +34,13 @@ class CollisionManager(TimeStepObserver):
         self.colliders.remove(collider)
 
     def check_overlap(self, c1, c2) -> bool:
+        from colliders.boundary_collider import BoundaryCollider
+
+        if isinstance(c1, BoundaryCollider):
+            return c1.overlaps(c2)
+        if isinstance(c2, BoundaryCollider):
+            return c2.overlaps(c1)
+
         dist_sq = (c1.position[0] - c2.position[0]) ** 2 + (
             c1.position[1] - c2.position[1]
         ) ** 2
@@ -45,6 +52,11 @@ class CollisionManager(TimeStepObserver):
         colliders_snapshot = self.colliders[:]
         for i in range(len(colliders_snapshot)):
             for j in range(i + 1, len(colliders_snapshot)):
-                if self.check_overlap(colliders_snapshot[i], colliders_snapshot[j]):
-                    colliders_snapshot[i].on_collision(colliders_snapshot[j])
-                    colliders_snapshot[j].on_collision(colliders_snapshot[i])
+                c1, c2 = colliders_snapshot[i], colliders_snapshot[j]
+                if self.check_overlap(c1, c2):
+                    # Static side reacts first so anything it pushes has already
+                    # moved by the time the mover is told about the collision
+                    if c1.movable and not c2.movable:
+                        c1, c2 = c2, c1
+                    c1.on_collision(c2)
+                    c2.on_collision(c1)
