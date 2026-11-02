@@ -31,8 +31,10 @@ class Nest(TimeStepObserver):
         self.nav_type: NavType = nav_type
         self.nav: Navigation = self.get_navigator()
         self.next_bot_id: int = 0
+        self.radius: float = 0.1
+        self.spawn_margin: float = 0.01
         self.instantiate_bot()
-        self.collider: Collider = Collider(0.1, self.location, self)
+        self.collider: Collider = Collider(self.radius, self.location, self)
         self.inventory: list = []
         self.time_since_last_spawn: float = 0.0
 
@@ -58,12 +60,51 @@ class Nest(TimeStepObserver):
         if id in self.bots:
             raise RuntimeError(f"Bot id {id} already in use; refusing to overwrite")
 
+        spawn_location: list[float] = self.get_spawn_location(bot.length / 2)
         bot_interface: BotInterface = BotInterface(
-            bot, self, self.location.copy(), self.arena
+            bot, self, spawn_location, self.arena
         )
         self.bots[id] = bot_interface
         bot.set_bot_interface(bot_interface)
         self.bot_move_command(id, bot_interface)
+
+    """Scans outward from the nest's center in rings spaced one bot radius
+    apart, out to the nest's radius, and returns the first point where the
+    bot is clear of every obstacle and inside the arena. The first ring is
+    just the center, so an unobstructed nest spawns bots at its center."""
+
+    def get_spawn_location(self, bot_radius: float) -> list[float]:
+        clearance: float = bot_radius + self.spawn_margin
+        ring_count: int = int(self.radius / bot_radius)
+
+        for ring in range(ring_count + 1):
+            ring_radius: float = ring * bot_radius
+            sample_count: int = max(1, math.ceil(2 * math.pi * ring_radius / bot_radius))
+
+            for sample in range(sample_count):
+                angle: float = 2 * math.pi * sample / sample_count
+                point: list[float] = [
+                    self.location[0] + ring_radius * math.sin(angle),
+                    self.location[1] + ring_radius * math.cos(angle),
+                ]
+                if self.is_valid_spawn(point, clearance):
+                    return point
+
+        raise RuntimeError(
+            f"No obstacle-free spawn point within {self.radius}m of nest at {self.location}"
+        )
+
+    def is_valid_spawn(self, point: list[float], clearance: float) -> bool:
+        if not (clearance <= point[0] <= self.arena.x - clearance):
+            return False
+        if not (clearance <= point[1] <= self.arena.y - clearance):
+            return False
+
+        for obs in self.arena.obstacles:
+            if math.dist(point, obs.position) < obs.radius + clearance:
+                return False
+
+        return True
 
     """Bot ids are drawn from a monotonic counter, never reused. Reusing ids
     (e.g. len(self.bots)) collides after destroy_bot pops from the dict, which

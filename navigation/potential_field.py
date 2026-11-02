@@ -13,6 +13,7 @@ class PotentialField(Navigation):
         self.attractive_strength = 0.2
         self.influence_dist = 0.2
         self.beta = 1
+        self.eta = 1e-4
         self.calc_walls = True # Test code, delete on release
 
     def set_target(self, target_loc: list[float]) -> None:
@@ -24,16 +25,26 @@ class PotentialField(Navigation):
         dx = self.attractive_strength * np.sin(theta_target)
         dy = self.attractive_strength * np.cos(theta_target)
 
+        escape_x = 0.0
+        escape_y = 0.0
+        inside_obstacle = False
+
         for obs in self.arena.obstacles:
             d_obs = np.linalg.norm(np.array(obs.position) - np.array(bot_position))
             theta_obs = np.arctan2(obs.x - bot_position[0], obs.y - bot_position[1])
+            d_surface = d_obs - obs.radius
 
-            if d_obs <= obs.radius:
-                dx = np.sign(np.sin(theta_obs))
-                dy = np.sign(np.cos(theta_obs))
-            elif d_obs < obs.radius + self.influence_dist:
-                dx += -self.beta * (self.influence_dist + obs.radius - d_obs) * np.sin(theta_obs)
-                dy += -self.beta * (self.influence_dist + obs.radius - d_obs) * np.cos(theta_obs)
+            if d_surface <= 0:
+                inside_obstacle = True
+                escape_x -= np.sin(theta_obs)
+                escape_y -= np.cos(theta_obs)
+            elif d_surface < self.influence_dist:
+                repulsion = self.eta * (1 / d_surface - 1 / self.influence_dist) / d_surface**2
+                dx -= repulsion * np.sin(theta_obs)
+                dy -= repulsion * np.cos(theta_obs)
+
+        if inside_obstacle:
+            return np.arctan2(escape_x, escape_y)
 
         if self.calc_walls: # Calc walls is test code. Remove once thoroughly tested
             d_left = bot_position[0]
