@@ -137,15 +137,11 @@ class Nest(TimeStepObserver):
             bot.state = BotState.RETURNING
 
         match bot.state:
-            case BotState.IDLE:
-                if len(self.arena.targets) > 0:
-                    target_loc = self.arena.target_locations[self.target_tracker]
-                    self.set_target_tracker()
-                else:
+            case BotState.IDLE | BotState.EXPLORING:
+                assigned_target = self.get_assigned_target(self.bots[bot_id])
+                if assigned_target is None:
                     return bot.interface.location
-            case BotState.EXPLORING:
-                target_loc = self.arena.target_locations[self.target_tracker]
-                self.set_target_tracker()
+                target_loc = assigned_target
             case BotState.RETURNING:
                 target_loc = self.location
             case _:
@@ -155,6 +151,16 @@ class Nest(TimeStepObserver):
                 )
             
         return target_loc
+
+    """Each bot is assigned one target, round-robin across bots, the first time
+    it needs one, and keeps it for the rest of its life. The tracker only
+    advances on assignment, never on re-steering or collisions."""
+
+    def get_assigned_target(self, bot_interface: "BotInterface") -> list[float] | None:
+        if bot_interface.assigned_target is None and len(self.arena.target_locations) > 0:
+            bot_interface.assigned_target = self.arena.target_locations[self.target_tracker]
+            self.set_target_tracker()
+        return bot_interface.assigned_target
 
     def bot_move_command(self, bot_id: int, bot_interface: "BotInterface") -> None:
         bot: MicroBot = self.bots[bot_id].bot
@@ -201,24 +207,11 @@ class Nest(TimeStepObserver):
     def basic_movement(self, bot_id: int) -> None:
         bot: MicroBot = self.bots[bot_id].bot
 
-        if len(self.arena.targets) == 0:
+        assigned_target = self.get_assigned_target(self.bots[bot_id])
+        if assigned_target is None:
             return
 
-        try:
-            bot_angle_to_target = self.get_new_bot_orientation(
-                bot_id, self.arena.targets[self.target_tracker].position
-            )
-        except:
-            target_count: int = len(self.arena.targets)
-            if target_count == 0:
-                # TODO: implement destroy bot
-                return
-            else:
-                bot_angle_to_target = self.get_new_bot_orientation(
-                    bot_id, self.arena.targets[0].position
-                )
-
-        self.set_target_tracker()
+        bot_angle_to_target = self.get_new_bot_orientation(bot_id, assigned_target)
         bot.rotate(
             bot_angle_to_target
         )  # calculate bot orientation and rotate relative to target

@@ -19,6 +19,7 @@ class BotInterface:
         self.arena: Arena = arena
         self.recent_positions: deque[list[float]] = deque()
         self.follow: BoundaryFollow | None = None
+        self.assigned_target: list[float] | None = None
 
         # Debug state: the force/target the sim actually used most recently.
         # Written by the nest each frame, read (never mutated) by overlays.
