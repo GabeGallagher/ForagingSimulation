@@ -21,9 +21,9 @@ class BotInterface:
         self.follow: BoundaryFollow | None = None
         self.assigned_target: list[float] | None = None
 
-        # Debug state: the force/target the sim actually used most recently.
+        # Debug state: the force components/target the sim actually used most recently.
         # Written by the nest each frame, read (never mutated) by overlays.
-        self.debug_force: NDArray | None = None
+        self.debug_forces: dict[str, NDArray] = {}
         self.debug_target: list[float] | None = None
 
     def report_collision(self, other) -> None:

@@ -3,11 +3,13 @@ from arena import Arena
 from nest import Nest
 from enums.navigation_type import NavType
 import json
+import os
 import random
 
 """Initializes simulation and runs separately from simulated components"""
 
-# Overwritten by every randomly generated run. Copy it elsewhere to keep a setup.
+# Overwritten by every randomly generated run. Copy it into test_arenas/ to keep a setup.
+LAST_RUN_CONFIG = "last_run_config.json"
 
 
 def save_config(path: str, target_locations, obstacle_specs) -> None:
@@ -33,11 +35,14 @@ if __name__ == "__main__":
     obstacle_count = 5
     obstacle_specs = []
     rand_sim = False
-    # Only used when rand_sim is False. Point at LAST_RUN_CONFIG to replay the
-    # previous run, or at a saved copy to reload an interesting setup.
-    # LAST_RUN_CONFIG = "last_run_config.json"
-    LAST_RUN_CONFIG = "obs_covering_nest_center"
-    config_path = "test_arenas/" + LAST_RUN_CONFIG + ".json"
+    # Only used when rand_sim is False. A layout name from test_arenas/, or
+    # None to replay the last random run from LAST_RUN_CONFIG.
+    saved_arena = "obs_covering_nest_center"
+    config_path = f"test_arenas/{saved_arena}.json" if saved_arena else LAST_RUN_CONFIG
+
+    if not rand_sim and not os.path.exists(config_path):
+        print(f"{config_path} not found, generating a random arena instead")
+        rand_sim = True
 
     if rand_sim:
         # randomly gens obstacles. Doesn't account for overlap

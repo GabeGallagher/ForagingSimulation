@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class Navigation(ABC):
     def __init__(self) -> None:
-        pass
+        self.last_forces: dict[str, NDArray] = {}
 
     @abstractmethod
     def set_target(self, target_loc: list[float]) -> None:

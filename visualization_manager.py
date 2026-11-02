@@ -19,6 +19,15 @@ STATE_COLORS = {
     BotState.BLOCKED: "salmon",
 }
 
+FORCE_COLORS = {
+    "attraction": "blue",
+    "repulsion": "red",
+    "circulation": "orange",
+    "walls": "saddlebrown",
+    "escape": "black",
+    "follow": "teal",
+}
+
 
 class VisualizationManager:
     def __init__(self, framerate: int, fig: Figure, ax: Axes, arena: Arena, nest: Nest, pause_callback) -> None:
@@ -42,6 +51,8 @@ class VisualizationManager:
             "Show Bot Locations",
         ]
         self.overlays = {key: False for key in self.overlay_keys}
+        self.force_scale: float = 0.5
+        self.max_force_length: float = 0.2
         self._build_overlay_controls()
 
     def _build_overlay_controls(self) -> None:
@@ -154,21 +165,31 @@ class VisualizationManager:
                 )
                 self.ax.add_patch(circle)
 
+    """One arrow per force component the navigator used, scaled by strength and
+    capped, since obstacle repulsion grows without bound near a surface"""
+
     def draw_force_vectors(self, nest: Nest) -> None:
+        drawn: set[str] = set()
         for ibot in nest.bots.values():
-            force = ibot.debug_force
-            if force is None:
-                continue
-            magnitude = float(np.linalg.norm(force))
-            if magnitude < 1e-9:
-                continue
-            length = 0.12
-            ux, uy = force[0] / magnitude, force[1] / magnitude
-            self.ax.arrow(
-                ibot.x, ibot.y, ux * length, uy * length,
-                head_width=0.02, head_length=0.02,
-                fc="red", ec="red", length_includes_head=True, zorder=5,
-            )
+            for name, force in ibot.debug_forces.items():
+                magnitude = float(np.linalg.norm(force))
+                if magnitude < 1e-9:
+                    continue
+                length = min(self.force_scale * magnitude, self.max_force_length)
+                ux, uy = force[0] / magnitude, force[1] / magnitude
+                color = FORCE_COLORS.get(name, "red")
+                self.ax.arrow(
+                    ibot.x, ibot.y, ux * length, uy * length,
+                    head_width=0.02, head_length=0.02,
+                    fc=color, ec=color, length_includes_head=True, zorder=5,
+                )
+                drawn.add(name)
+
+        for name in FORCE_COLORS:
+            if name in drawn:
+                self.ax.plot([], [], color=FORCE_COLORS[name], label=f"{name.capitalize()} force")
+        if drawn:
+            self.ax.legend()
 
     def draw_headings(self, nest: Nest) -> None:
         for ibot in nest.bots.values():

@@ -174,6 +174,7 @@ class Nest(TimeStepObserver):
                 if bot.state == BotState.IDLE:
                     bot.set_state(BotState.EXPLORING)
                 bot_interface.debug_target = target
+                bot_interface.debug_forces = self.nav.last_forces
                 # print(
                 #     f"bot_{bot_id} moving at angle {bot_angle_to_target} radians and {math.degrees(bot_angle_to_target)} degrees thanks to potential field algo"
                 # )

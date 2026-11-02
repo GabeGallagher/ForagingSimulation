@@ -10,12 +10,12 @@ What is built today. Where the implementation differs from the plan, it's noted 
 
 ### Running the Simulation
 Entry point is `run_simulation.py`. Options are set at the top of its `__main__` block:
-- `rand_sim` - `True` generates random obstacles (centers in 0.2-0.7 m, radii 0.025-0.2 m, overlap allowed) and saves the layout. `False` loads a saved layout.
-- `LAST_RUN_CONFIG` - name (without `.json`) of the layout to load from `test_arenas/`
+- `rand_sim` - `True` generates random obstacles (centers in 0.2-0.7 m, radii 0.025-0.2 m, overlap allowed) and saves the layout to `last_run_config.json` in the repo root, overwriting the previous one. `False` loads a saved layout.
+- `saved_arena` - name (without `.json`) of the layout to load from `test_arenas/`, or `None` to replay the last random run
 - `headless` - `True` runs 400 steps with no window
 - `nav_type` - `NavType.POTENTIAL_FIELD` or `NavType.BASIC`
 
-Arena layouts are JSON files with `target_locations` and `obstacle_specs` (`[x, y, radius]` per obstacle). `test_arenas/` is kept out of version control, so a fresh clone has no saved layouts; use `rand_sim = True` to start.
+Arena layouts are JSON files with `target_locations` and `obstacle_specs` (`[x, y, radius]` per obstacle). Neither `test_arenas/` nor `last_run_config.json` is in version control. If the chosen layout file doesn't exist (as on a fresh clone), the script prints a notice and generates a random arena instead. To keep a random layout, copy `last_run_config.json` into `test_arenas/` under a new name.
 
 Default timing: 50 ms simulation step, 20 fps rendering.
 
@@ -80,7 +80,9 @@ Tuning parameters:
 | `stuck_distance` | `Nest` | 0.02 m | Net movement below which a bot is stuck |
 
 ### Debug Tools
-Overlay checkboxes in the visualization window: headings, state colors, target lines, obstacle influence zones, and bot coordinates. A force vector overlay is listed, but nothing populates `debug_force` yet, so it draws nothing.
+Overlay checkboxes in the visualization window: force vectors, headings, state colors, target lines, obstacle influence zones, and bot coordinates.
+
+The force vector overlay draws one arrow per component the navigator used that step: attraction (blue), obstacle repulsion (red), circulation (orange), and walls (brown); or escape (black) or follow (teal) when those are steering instead. Arrow length scales with strength and is capped at 0.2 m, since repulsion grows without bound near an obstacle. The heading overlay shows the resulting direction. The navigator records components in `last_forces`, and the nest copies them to each bot's `debug_forces`.
 
 ### Known Limitations
 - One bot per run

@@ -31,11 +31,12 @@ class PotentialField(Navigation):
     def get_direction(self, bot_position: list[float], bot_rotation: float) -> float:
         theta_target = np.arctan2(self.target[0] - bot_position[0], self.target[1] - bot_position[1])
 
-        dx = self.attractive_strength * np.sin(theta_target)
-        dy = self.attractive_strength * np.cos(theta_target)
+        attraction = self.attractive_strength * np.array([np.sin(theta_target), np.cos(theta_target)])
+        repulsion = np.zeros(2)
+        circulation = np.zeros(2)
+        walls = np.zeros(2)
 
-        escape_x = 0.0
-        escape_y = 0.0
+        escape = np.zeros(2)
         inside_obstacle = False
 
         for obs in self.arena.obstacles:
@@ -45,19 +46,17 @@ class PotentialField(Navigation):
 
             if d_surface <= 0:
                 inside_obstacle = True
-                escape_x -= np.sin(theta_obs)
-                escape_y -= np.cos(theta_obs)
+                escape -= np.array([np.sin(theta_obs), np.cos(theta_obs)])
             elif d_surface < self.influence_dist:
-                repulsion = self.eta * (1 / d_surface - 1 / self.influence_dist) / d_surface**2
-                dx -= repulsion * np.sin(theta_obs)
-                dy -= repulsion * np.cos(theta_obs)
+                strength = self.eta * (1 / d_surface - 1 / self.influence_dist) / d_surface**2
+                repulsion -= strength * np.array([np.sin(theta_obs), np.cos(theta_obs)])
 
                 side = self.get_circulation_side(theta_target, theta_obs)
-                dx += self.circulation * repulsion * side * np.cos(theta_obs)
-                dy -= self.circulation * repulsion * side * np.sin(theta_obs)
+                circulation += self.circulation * strength * side * np.array([np.cos(theta_obs), -np.sin(theta_obs)])
 
         if inside_obstacle:
-            return np.arctan2(escape_x, escape_y)
+            self.last_forces = {"escape": escape}
+            return np.arctan2(escape[0], escape[1])
 
         if self.calc_walls: # Calc walls is test code. Remove once thoroughly tested
             d_left = bot_position[0]
@@ -66,16 +65,22 @@ class PotentialField(Navigation):
             d_top = self.arena.y - bot_position[1]
 
             if d_left < self.influence_dist:
-                dx += self.beta * (self.influence_dist - d_left)
+                walls[0] += self.beta * (self.influence_dist - d_left)
             if d_right < self.influence_dist:
-                dx -= self.beta * (self.influence_dist - d_right)
+                walls[0] -= self.beta * (self.influence_dist - d_right)
             if d_bottom < self.influence_dist:
-                dy += self.beta * (self.influence_dist - d_bottom)
+                walls[1] += self.beta * (self.influence_dist - d_bottom)
             if d_top < self.influence_dist:
-                dy -= self.beta * (self.influence_dist - d_top)
+                walls[1] -= self.beta * (self.influence_dist - d_top)
 
-
-        rotation: float = np.arctan2(dx, dy)
+        self.last_forces = {
+            "attraction": attraction,
+            "repulsion": repulsion,
+            "circulation": circulation,
+            "walls": walls,
+        }
+        total = attraction + repulsion + circulation + walls
+        rotation: float = np.arctan2(total[0], total[1])
 
         return rotation
 
@@ -164,6 +169,7 @@ class PotentialField(Navigation):
 
         dx = side * np.cos(theta_obs) - correction * np.sin(theta_obs)
         dy = -side * np.sin(theta_obs) - correction * np.cos(theta_obs)
+        self.last_forces = {"follow": np.array([dx, dy])}
         return np.arctan2(dx, dy)
 
     def heads_into_wall(self, bot_position: list[float], rotation: float) -> bool:
