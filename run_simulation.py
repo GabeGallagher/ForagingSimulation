@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # None to replay the last random run from LAST_RUN_CONFIG.
     saved_arena = "obs_covering_nest_center"
     config_path = f"test_arenas/{saved_arena}.json" if saved_arena else LAST_RUN_CONFIG
-
+ 
     if not rand_sim and not os.path.exists(config_path):
         print(f"{config_path} not found, generating a random arena instead")
         rand_sim = True
